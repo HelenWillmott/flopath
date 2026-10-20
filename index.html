@@ -60,6 +60,7 @@
 .pal .sw{display:inline-flex;border-radius:999px;overflow:hidden;border:1px solid rgba(0,0,0,.15)}
 .pal .sw i{width:10px;height:18px;display:block}
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
 .wrap{max-width:1240px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
 button,select{font:inherit;color:inherit}
@@ -119,7 +120,7 @@ h1 .hl{background:linear-gradient(transparent 58%, var(--accent) 58%, var(--acce
 .filter[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
 .filter .c{font-family:var(--mono);opacity:.7;margin-left:4px}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;align-items:start}
 .card{background:var(--surface);border:2.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;transition:transform .15s, box-shadow .15s}
 .card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--shadow)}
 .card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
