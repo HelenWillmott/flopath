@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FloPath</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: chunky sticker-style picker on the left (sticky on desktop), course results on the right; stacks on phones. */
+:root{
+  --bg:#EAF0F8; --surface:#FFFFFF; --surface-2:#F4F7FC; --ink:#131A35; --muted:#58617F; --line:#131A35; --shadow:#131A35;
+  --accent:#FF4F79; --num:#E8365F; --sun:#FFD23F; --mint:#24C79C; --sky:#5B8CFF; --lilac:#B591FF; --on-pop:#131A35;
+  --display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
+  --body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1328; --surface:#1A2044; --surface-2:#232A55; --ink:#F1F3FB; --muted:#A3AACB; --line:#7E88BE; --shadow:#05071A;
+  --accent:#FF6B8E; --sun:#FFD84F; --mint:#3DD6AD; --sky:#7AA2FF; --lilac:#C2A6FF; --on-pop:#131A35; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1328; --surface:#1A2044; --surface-2:#232A55; --ink:#F1F3FB; --muted:#A3AACB; --line:#7E88BE; --shadow:#05071A;
+  --accent:#FF6B8E; --sun:#FFD84F; --mint:#3DD6AD; --sky:#7AA2FF; --lilac:#C2A6FF; --on-pop:#131A35; color-scheme:dark}
+
+/* Calmer colour schemes, chosen with the switcher in the header */
+:root[data-palette="sage"]{--bg:#F4F6F2; --surface:#FFFFFF; --surface-2:#EDF1EA; --ink:#1F2D26; --muted:#5C6A62; --line:#C9D3CB; --shadow:#1F2D261A; --accent:#E9B9A6; --num:#3E7A5C; --sun:#F1DFA6; --mint:#B9DDC4; --sky:#BFD6E6; --lilac:#D6CDEA; --on-pop:#1F2D26}
+@media (prefers-color-scheme: dark){:root[data-palette="sage"]:not([data-theme="light"]){--bg:#141B17; --surface:#1C2620; --surface-2:#24302A; --ink:#E9EFEA; --muted:#A3B1A8; --line:#3A4A41; --shadow:#00000059; --accent:#B9806C; --num:#8FD0AE; --sun:#CDB66E; --mint:#6FAF8A; --sky:#6E97B3; --lilac:#9C8FC2; --on-pop:#101612; color-scheme:dark}}
+:root[data-palette="sage"][data-theme="dark"]{--bg:#141B17; --surface:#1C2620; --surface-2:#24302A; --ink:#E9EFEA; --muted:#A3B1A8; --line:#3A4A41; --shadow:#00000059; --accent:#B9806C; --num:#8FD0AE; --sun:#CDB66E; --mint:#6FAF8A; --sky:#6E97B3; --lilac:#9C8FC2; --on-pop:#101612; color-scheme:dark}
+:root[data-palette="ocean"]{--bg:#F2F5F9; --surface:#FFFFFF; --surface-2:#EAF0F6; --ink:#1B2A3A; --muted:#5B6B7C; --line:#C8D3DF; --shadow:#1B2A3A1A; --accent:#F2C3C0; --num:#2F6DB0; --sun:#F3E3AE; --mint:#BFE3D8; --sky:#BCD3F0; --lilac:#D3D0EE; --on-pop:#1B2A3A}
+@media (prefers-color-scheme: dark){:root[data-palette="ocean"]:not([data-theme="light"]){--bg:#111925; --surface:#192333; --surface-2:#212D40; --ink:#E8EEF5; --muted:#9DAABA; --line:#34445A; --shadow:#00000059; --accent:#C78C88; --num:#8DB8EA; --sun:#CDB875; --mint:#73B6A3; --sky:#6F9AD0; --lilac:#9893C9; --on-pop:#0F1620; color-scheme:dark}}
+:root[data-palette="ocean"][data-theme="dark"]{--bg:#111925; --surface:#192333; --surface-2:#212D40; --ink:#E8EEF5; --muted:#9DAABA; --line:#34445A; --shadow:#00000059; --accent:#C78C88; --num:#8DB8EA; --sun:#CDB875; --mint:#73B6A3; --sky:#6F9AD0; --lilac:#9893C9; --on-pop:#0F1620; color-scheme:dark}
+:root[data-palette="lavender"]{--bg:#F6F4F9; --surface:#FFFFFF; --surface-2:#EFEBF5; --ink:#2A2438; --muted:#686178; --line:#D3CCE0; --shadow:#2A24381A; --accent:#EDBFD0; --num:#7254B5; --sun:#F2E1B3; --mint:#C2E2D2; --sky:#C6D4EF; --lilac:#D9CCF0; --on-pop:#2A2438}
+@media (prefers-color-scheme: dark){:root[data-palette="lavender"]:not([data-theme="light"]){--bg:#18151F; --surface:#211D2B; --surface-2:#2A2536; --ink:#EEEAF4; --muted:#A8A0B8; --line:#3E3750; --shadow:#00000059; --accent:#C28AA0; --num:#B9A2EC; --sun:#CDB879; --mint:#78B49A; --sky:#7C96CC; --lilac:#A58FD6; --on-pop:#15121B; color-scheme:dark}}
+:root[data-palette="lavender"][data-theme="dark"]{--bg:#18151F; --surface:#211D2B; --surface-2:#2A2536; --ink:#EEEAF4; --muted:#A8A0B8; --line:#3E3750; --shadow:#00000059; --accent:#C28AA0; --num:#B9A2EC; --sun:#CDB879; --mint:#78B49A; --sky:#7C96CC; --lilac:#A58FD6; --on-pop:#15121B; color-scheme:dark}
+:root[data-palette="stone"]{--bg:#F5F5F4; --surface:#FFFFFF; --surface-2:#EEEEEC; --ink:#262626; --muted:#66655F; --line:#D6D5D0; --shadow:#00000014; --accent:#E7C4B4; --num:#8A5A44; --sun:#EEDFB5; --mint:#C7DECF; --sky:#C9D6E2; --lilac:#D8D2E4; --on-pop:#262626}
+@media (prefers-color-scheme: dark){:root[data-palette="stone"]:not([data-theme="light"]){--bg:#161616; --surface:#1F1F1E; --surface-2:#282827; --ink:#EDEDEB; --muted:#A5A49E; --line:#3C3C3A; --shadow:#00000066; --accent:#B98A76; --num:#E0B39F; --sun:#C9B67A; --mint:#7FAE91; --sky:#7E98B0; --lilac:#9E93B8; --on-pop:#141414; color-scheme:dark}}
+:root[data-palette="stone"][data-theme="dark"]{--bg:#161616; --surface:#1F1F1E; --surface-2:#282827; --ink:#EDEDEB; --muted:#A5A49E; --line:#3C3C3A; --shadow:#00000066; --accent:#B98A76; --num:#E0B39F; --sun:#C9B67A; --mint:#7FAE91; --sky:#7E98B0; --lilac:#9E93B8; --on-pop:#141414; color-scheme:dark}
+/* Softer shapes for the calmer schemes: thin borders, blurred shadows */
+:root.soft .panel,:root.soft .card,:root.soft .notes,:root.soft .uni-panel{border-width:1.5px}
+:root.soft .panel{box-shadow:0 10px 30px var(--shadow)}
+:root.soft .card:hover{box-shadow:0 8px 22px var(--shadow)}
+:root.soft .uni-panel{box-shadow:0 14px 34px var(--shadow)}
+:root.soft .chip,:root.soft .filter,:root.soft .tab,:root.soft .pick,:root.soft .uchip,:root.soft .pill,:root.soft .uni-btn,:root.soft .unlock-btn,:root.soft .grade-row select,:root.soft .bar,:root.soft .mini,:root.soft .focus,:root.soft .via,:root.soft .unlock,:root.soft .uni .mark,:root.soft summary::before,:root.soft .uni-foot button,:root.soft .mini .add button{border-width:1.5px}
+:root.soft .chip:hover{box-shadow:0 2px 8px var(--shadow)}
+:root.soft .chip[aria-pressed="true"],:root.soft .uni-btn{box-shadow:0 2px 8px var(--shadow)}
+:root.soft .bar .range{background:var(--sky)}
+:root.soft h1 .hl{background:linear-gradient(transparent 62%, var(--accent) 62%, var(--accent) 90%, transparent 90%)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:inline-flex;align-items:center;gap:.25em;font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,6vw,3.4rem);letter-spacing:-.03em;color:var(--ink);line-height:1}
+.brand-mark{display:inline-grid;place-items:center;color:var(--num)}
+.brand-mark svg{width:1.05em;height:1.05em}
+.topbar{margin-bottom:22px}
+.brand-flo{color:var(--num)}
+.palette{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--muted)}
+#palette-btns{display:flex;gap:8px;flex-wrap:wrap}
+.pal{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px 4px 5px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+.pal[aria-pressed="true"]{outline:2.5px solid var(--ink);outline-offset:1px}
+.pal .sw{display:inline-flex;border-radius:999px;overflow:hidden;border:1px solid rgba(0,0,0,.15)}
+.pal .sw i{width:10px;height:18px;display:block}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+a{color:inherit}
+
+/* Hero */
+.hero{padding-block:40px 28px}
+.eyebrow{display:inline-block;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;background:var(--sun);color:var(--on-pop);padding:4px 10px;border:2px solid var(--line);border-radius:999px;transform:rotate(-2deg)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,4.6vw,3.4rem);line-height:1;letter-spacing:-.02em;margin:18px 0 14px;text-wrap:balance;max-width:16ch}
+h1 .hl{background:linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%);padding:0 .05em}
+.lede{font-size:1.1rem;color:var(--muted);max-width:none;margin:0}
+
+/* Main layout */
+.layout{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:28px;align-items:start;padding-block:0 56px}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:2.5px solid var(--line);border-radius:18px;box-shadow:6px 6px 0 var(--shadow);padding:20px;display:flex;flex-direction:column;gap:22px;position:sticky;top:calc(env(safe-area-inset-top, 0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}
+@media (max-width:900px){.panel{position:static;max-height:none}}
+.step-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+.step-head h2{font-family:var(--display);font-weight:800;font-size:1.25rem;margin:0;letter-spacing:-.01em}
+.step-num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--surface);font-size:14px;font-weight:700;margin-right:8px;vertical-align:2px}
+.count{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+.group-label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;cursor:pointer;transition:transform .12s, box-shadow .12s, background .12s}
+.chip:hover{transform:translate(-1px,-1px);box-shadow:2px 2px 0 var(--shadow)}
+.chip[aria-pressed="true"]{background:var(--sun);color:var(--on-pop);box-shadow:3px 3px 0 var(--shadow);transform:translate(-1px,-1px)}
+.chip[aria-pressed="true"]::before{content:"✓ ";font-weight:800}
+.chip.full{opacity:.45}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+
+.grades{display:flex;flex-direction:column;gap:8px}
+.grade-row{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--surface-2);border-radius:12px;padding:8px 10px 8px 14px}
+.grade-row label{font-weight:600;min-width:0}
+.grade-row select{max-width:100%;font-family:var(--mono);font-weight:700;font-size:15px;background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:5px 8px;cursor:pointer}
+.points{margin-top:12px;display:flex;align-items:center;gap:14px;background:var(--ink);color:var(--surface);border-radius:14px;padding:14px 16px}
+.points .big{font-family:var(--mono);font-size:2rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.points .small{font-size:13px;opacity:.85;line-height:1.35}
+.empty-grades{font-size:14px;color:var(--muted);margin:0}
+
+.unlock{border:2px dashed var(--line);border-radius:14px;padding:14px}
+.unlock h3{font-family:var(--display);font-size:1.05rem;margin:0 0 4px}
+.unlock p{margin:0 0 10px;font-size:14px;color:var(--muted)}
+.unlock-list{display:flex;flex-direction:column;gap:6px}
+.unlock-btn{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;cursor:pointer;font-weight:600}
+.unlock-btn:hover{background:var(--surface-2)}
+.unlock-btn .n{font-family:var(--mono);font-size:13px;background:var(--mint);color:var(--on-pop);border-radius:999px;padding:2px 8px;white-space:nowrap}
+
+/* Results */
+.results{min-width:0;display:flex;flex-direction:column;gap:18px}
+.summary{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+.summary h2{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.4rem);margin:0;line-height:1.05;letter-spacing:-.015em;text-wrap:balance}
+.summary h2 .num{color:var(--num)}
+.summary p{margin:4px 0 0;color:var(--muted)}
+.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filter{border:2px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer}
+.filter[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.filter .c{font-family:var(--mono);opacity:.7;margin-left:4px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+.card{background:var(--surface);border:2.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;transition:transform .15s, box-shadow .15s}
+.card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--shadow)}
+.card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.area{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.area::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--dot,var(--muted));border:1.5px solid var(--line)}
+.pill{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;border:2px solid var(--line);color:var(--on-pop);white-space:nowrap}
+.fit-top{background:var(--mint)} .fit-in{background:var(--sky)} .fit-near{background:var(--sun)} .fit-stretch{background:var(--accent)}
+.card h3{font-family:var(--display);font-weight:800;font-size:1.3rem;line-height:1.1;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.req{font-size:14px;margin:0;color:var(--muted)}
+.req b{color:var(--ink);font-weight:700}
+.offer{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.offer .lab{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.offer .g{font-family:var(--mono);font-weight:700;font-size:1.05rem}
+.offer .g span{font-weight:500;color:var(--muted);font-size:.85rem;margin:0 4px}
+.bar{position:relative;height:14px;background:var(--surface-2);border:2px solid var(--line);border-radius:999px;margin:14px 0 4px}
+.bar .range{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(-45deg,var(--sky) 0 6px, color-mix(in srgb, var(--sky) 70%, var(--surface)) 6px 12px);border-radius:999px}
+.bar .you{position:absolute;top:-17px;transform:translateX(-50%);font-family:var(--mono);font-size:11px;font-weight:700;background:var(--ink);color:var(--surface);padding:1px 6px;border-radius:6px;white-space:nowrap}
+.bar .you::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);width:3px;height:19px;background:var(--ink)}
+.bar-scale{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+details{border-top:2px dashed color-mix(in srgb, var(--line) 35%, transparent);padding-top:8px;margin-top:auto}
+summary{cursor:pointer;font-weight:700;font-size:14px;list-style:none;display:flex;align-items:center;gap:6px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--mono);display:inline-grid;place-items:center;width:20px;height:20px;border:2px solid var(--line);border-radius:6px;font-size:13px}
+details[open] summary::before{content:"–"}
+.more{font-size:14px;display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.more p{margin:0}
+.more .k{font-weight:700}
+.more .extra{background:var(--surface-2);border-radius:10px;padding:8px 10px}
+
+.almost-wrap h2{font-family:var(--display);font-weight:800;font-size:1.5rem;margin:12px 0 4px}
+.almost-wrap > p{margin:0 0 12px;color:var(--muted)}
+.almost{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.mini{border:2px dashed var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb, var(--surface) 55%, transparent)}
+.mini h4{margin:0;font-family:var(--display);font-size:1.05rem}
+.mini .add{display:flex;flex-wrap:wrap;gap:5px;align-items:center;font-size:13px;color:var(--muted)}
+.mini .add button{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:2px 9px;font-size:13px;font-weight:700;cursor:pointer}
+.mini .add button:hover{background:var(--sun);color:var(--on-pop)}
+
+.nothing{border:2.5px dashed var(--line);border-radius:16px;padding:28px;text-align:center;color:var(--muted)}
+.notes{background:var(--surface);border:2.5px solid var(--line);border-radius:16px;padding:18px 20px;font-size:14px;color:var(--muted)}
+.notes h3{font-family:var(--display);color:var(--ink);margin:0 0 6px;font-size:1.1rem}
+.notes ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.notes a{color:var(--ink);font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted);align-items:center}
+.legend .pill{font-size:11px}
+
+.toolbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px}
+.uni-pick{position:relative;display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px;flex-wrap:wrap;min-width:0}
+.uni-btn{border:2.5px solid var(--line);background:var(--surface);border-radius:12px;padding:7px 12px;font-weight:700;box-shadow:3px 3px 0 var(--shadow);cursor:pointer}
+.uni-btn::after{content:" ▾";font-size:12px}
+.uni-btn[aria-expanded="true"]{background:var(--sun);color:var(--on-pop)}
+.uni-panel{position:absolute;left:0;top:calc(100% + 8px);z-index:20;width:min(360px, calc(100vw - 32px));background:var(--surface);border:2.5px solid var(--line);border-radius:14px;box-shadow:6px 6px 0 var(--shadow);padding:10px;display:flex;flex-direction:column;gap:8px}
+.uni-panel input{border:2px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;background:var(--surface-2);color:var(--ink);width:100%}
+.uni-options{max-height:280px;overflow:auto;display:flex;flex-direction:column}
+.uni-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;cursor:pointer;font-weight:600}
+.uni-opt:hover{background:var(--surface-2)}
+.uni-opt input{width:18px;height:18px;accent-color:var(--accent);flex:none;margin:0}
+.uni-opt .lbl{display:flex;align-items:center;gap:8px;min-width:0}
+.uni-opt .cn{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+.uni-foot{display:flex;justify-content:space-between;gap:8px}
+.uni-foot button{border:2px solid var(--line);background:transparent;border-radius:10px;padding:5px 12px;font-weight:700;cursor:pointer}
+.uni-foot .done{background:var(--ink);color:var(--surface)}
+.uni-chips{display:flex;flex-wrap:wrap;gap:6px;width:100%}
+.uni-chips:empty{display:none}
+.uchip{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--sun);color:var(--on-pop);border-radius:999px;padding:3px 6px 3px 11px;font-size:13px;font-weight:700;cursor:pointer}
+.uchip .x{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--on-pop);color:var(--sun);font-size:11px}
+.opt{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:2px dashed var(--line);border-radius:999px;padding:1px 8px}
+.points.off{background:var(--surface-2);color:var(--muted)}
+.points.off .small{opacity:1;font-size:14px}
+.uni.none .mark{background:var(--surface-2);color:var(--muted)}
+.uni .mark{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;border:2px solid var(--line);font-size:12px;font-weight:800;color:var(--on-pop);flex:none}
+.uni.meet .mark{background:var(--mint)} .uni.close .mark{background:var(--sun)} .uni.reach .mark{background:var(--surface-2);color:var(--muted)}
+.legend .uni{display:inline-flex;align-items:center;gap:6px}
+.unis-d{margin-top:4px}
+.unis-d summary .sc{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500}
+.unis{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.unis li,.focus{display:grid;grid-template-columns:20px minmax(0,1fr) auto;column-gap:10px;align-items:center;padding:5px 6px;border-radius:8px;font-size:14px}
+.unis li:nth-child(odd){background:var(--surface-2)}
+.unis li.hl{outline:2.5px solid var(--accent)}
+.un{min-width:0;font-weight:600}
+a.un{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px}
+.ug{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums}
+.note{grid-column:2 / -1;font-size:12px;color:var(--muted);line-height:1.35}
+.uni.reach .un,.uni.reach .ug{color:var(--muted)}
+.focus{border:2px solid var(--line);background:var(--surface-2);padding:8px 10px}
+.focus-list{display:flex;flex-direction:column;gap:6px}
+.src{font-size:12px;color:var(--muted);margin:8px 0 0}
+.picks-box{background:var(--surface-2);border-radius:12px;padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px}
+.picks-head{font-family:var(--display);font-weight:800;font-size:1rem}
+.pick-cat{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
+.tab{border:2px solid var(--line);background:transparent;border-radius:10px;padding:5px 10px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--surface)}
+.tn{font-family:var(--mono);font-size:11px;background:var(--sun);color:var(--on-pop);border-radius:999px;padding:0 6px}
+.tab-blurb{font-size:13px;color:var(--muted);margin:8px 0}
+.pick{display:inline-flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--sun);color:var(--on-pop);border-radius:999px;padding:3px 6px 3px 4px;font-size:13px;font-weight:700;cursor:pointer;text-align:left}
+.pick .x{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--on-pop);color:var(--sun);font-size:11px;flex:none}
+.badge{font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;background:var(--ink);color:var(--surface);border-radius:999px;padding:1px 7px;white-space:nowrap}
+.pick .badge{background:var(--on-pop);color:var(--sun)}
+.grade-row{flex-wrap:wrap}
+.gr-name{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-weight:600;min-width:0}
+.gr-extra{flex-basis:100%;font-size:12px;color:var(--muted);font-weight:500}
+.sels{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;margin-left:auto}
+.size-sel{font-family:var(--body)!important;font-size:13px!important;max-width:100%}
+.via{font-size:13px;margin:0;background:color-mix(in srgb, var(--mint) 22%, var(--surface));border:2px solid var(--line);border-radius:10px;padding:7px 10px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s, transform .2s;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+
+<header class="hero wrap">
+  <div class="topbar">
+    <div class="brand" aria-label="FloPath"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="40" height="40"><path d="M4 22c6 0 6-12 12-12s6 12 12 12" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="4" cy="22" r="3" fill="currentColor"/><circle cx="28" cy="22" r="3" fill="currentColor"/></svg></span><span class="brand-name"><span class="brand-flo">Flo</span>Path</span></div>
+    <div class="palette" role="group" aria-label="Colour scheme"><span>Colours</span><div id="palette-btns"></div></div>
+  </div>
+  <h1>Pick your subjects. See <span class="hl">where they lead.</span></h1>
+  <p class="lede">Choose what you're studying after GCSEs: A-levels, BTECs, Cambridge Technicals, T Levels, or a mix. Add your predicted grades if you know them. We'll show the UK degree courses your choices open up, which universities run them, the grades each one asks for, and which subject would unlock even more.</p>
+</header>
+
+<main class="wrap layout">
+  <aside class="panel" aria-label="Your subjects and grades">
+    <section>
+      <div class="step-head"><h2><span class="step-num">1</span>Your subjects</h2><span class="count" id="count" title="A-levels' worth picked">0/4</span></div>
+      <div id="your-picks"></div>
+      <div class="tabs" id="qual-tabs" role="tablist" aria-label="Qualification type"></div>
+      <div id="subject-groups"></div>
+      <p class="hint">Pick up to 4 A-levels' worth. Mixing is fine, like 2 A-levels and a BTEC Extended Certificate. A BTEC Extended Diploma or a T Level counts as 3.</p>
+    </section>
+    <section>
+      <div class="step-head"><h2><span class="step-num">2</span>Predicted grades</h2><span class="opt">Optional</span></div>
+      <div class="grades" id="grades"></div>
+      <div class="points" id="points"></div>
+    </section>
+    <section class="unlock" id="unlock"></section>
+  </aside>
+
+  <section class="results" aria-live="polite">
+    <div class="summary">
+      <div>
+        <h2 id="summary-title"></h2>
+        <p id="summary-sub"></p>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="uni-pick" id="uni-pick">
+        <span class="uni-label">Show courses at</span>
+        <button type="button" class="uni-btn" id="uni-btn" aria-expanded="false" aria-controls="uni-panel">Any university</button>
+        <div class="uni-panel" id="uni-panel" hidden>
+          <input type="search" id="uni-search" placeholder="Search universities" autocomplete="off" aria-label="Search universities">
+          <div class="uni-options" id="uni-options" role="group" aria-label="Universities"></div>
+          <div class="uni-foot"><button type="button" id="uni-clear">Clear all</button><button type="button" id="uni-done" class="done">Done</button></div>
+        </div>
+        <div class="uni-chips" id="uni-chips"></div>
+      </div>
+      <div class="legend" id="legend">
+        <span class="uni meet"><span class="mark">✓</span>Your grades meet it</span>
+        <span class="uni close"><span class="mark">~</span>One grade off</span>
+        <span class="uni reach"><span class="mark">↑</span>Needs higher grades</span>
+      </div>
+    </div>
+    <div class="filters" id="filters" role="group" aria-label="Filter by subject area"></div>
+    <div class="grid" id="grid"></div>
+    <div class="almost-wrap" id="almost-wrap"></div>
+    <aside class="notes">
+      <h3>Before you decide</h3>
+      <ul>
+        <li>Each uni's grades are its standard A-level offer. Medicine offers are for 2027 entry. Psychology, Law, Computer Science, Nursing, Economics and Business were checked on each uni's own course page in October 2026, and you can tap a uni to open its page. The others are recent offers, and unis change them most years, so always check the course page before you apply.</li><li>The lists show a spread of universities for each course, not every one. UCAS lists them all.</li>
+        <li>Lots of unis make lower "contextual" offers, and many courses have a foundation year if your grades come in lower.</li>
+        <li>GCSEs count too. Most courses want at least grade 4 or 5 in English and Maths.</li>
+        <li>BTECs, Cambridge Technicals and T Levels are accepted for lots of courses, especially where no particular subject is required. Courses that need a specific science or Maths usually want the A-level, and some highly selective unis rarely take vocational qualifications on their own. Grades for these are compared using UCAS points.</li>
+        <li>Search real courses on <a href="https://digital.ucas.com/coursesearch/" target="_blank" rel="noopener">UCAS</a> and check subject advice at <a href="https://www.informedchoices.ac.uk/" target="_blank" rel="noopener">Informed Choices</a>.</li>
+      </ul>
+    </aside>
+  </section>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const CATS = ["Sciences & Maths","Technology & Engineering","Health, Care & Education","English & Humanities","Social Sciences, Business & Law","Languages","Creative & Performing Arts","Sport, Services & Land","Extras"];
+const ALEVEL_GROUPS = [
+  ["Sciences & Maths", ["Biology","Chemistry","Physics","Maths","Further Maths","Statistics","Psychology","Environmental Science","Geology"]],
+  ["Technology & Engineering", ["Computer Science","Electronics","Design & Technology"]],
+  ["English & Humanities", ["English Literature","English Language","English Language & Literature","History","Ancient History","Geography","Religious Studies","Philosophy","Classical Civilisation","Latin","Classical Greek","History of Art"]],
+  ["Social Sciences, Business & Law", ["Economics","Business","Accounting","Sociology","Politics","Law"]],
+  ["Languages", ["French","Spanish","German","Italian","Chinese (Mandarin)","Urdu","Arabic"]],
+  ["Creative & Performing Arts", ["Fine Art","Photography","Graphic Communication","Textiles","3D Design","Media Studies","Film Studies","Music","Music Technology","Drama & Theatre","Dance"]],
+  ["Sport, Services & Land", ["PE"]]
+];
+const KEY_CAT = {science:"Sciences & Maths", forensic:"Sciences & Maths", it:"Technology & Engineering", engineering:"Technology & Engineering", construction:"Technology & Engineering",
+  health:"Health, Care & Education", childcare:"Health, Care & Education", education:"Health, Care & Education",
+  business:"Social Sciences, Business & Law", finance:"Social Sciences, Business & Law", admin:"Social Sciences, Business & Law", law:"Social Sciences, Business & Law", psych:"Social Sciences, Business & Law", crim:"Social Sciences, Business & Law",
+  media:"Creative & Performing Arts", art:"Creative & Performing Arts", performing:"Creative & Performing Arts", music:"Creative & Performing Arts", craft:"Creative & Performing Arts",
+  sport:"Sport, Services & Land", uniformed:"Sport, Services & Land", animal:"Sport, Services & Land", travel:"Sport, Services & Land", agriculture:"Sport, Services & Land", extra:"Extras"};
+const ALEVELS = ALEVEL_GROUPS.flatMap(g => g[1]);
+const LANGS = ["French","Spanish","German","Italian","Chinese (Mandarin)","Urdu","Arabic"];
+// Names used in the course data that stand for a family of A-levels
+const FAMILY = {
+  "Art & Design": ["Fine Art","Photography","Graphic Communication","Textiles","3D Design"],
+  "Classics": ["Classical Civilisation","Latin","Classical Greek","Ancient History"],
+  "Drama": ["Drama & Theatre"],
+  "English Literature": ["English Literature","English Language & Literature"]
+};
+const REQ_ADD = {"Environmental Science":["Environmental Science","Geology"], "Geology / Earth Sciences":["Geology","Environmental Science"]};
+const HELP_ADD = {"Data Science":["Statistics"],"Psychology":["Statistics"],"Electrical & Electronic Engineering":["Electronics"],"Film & Media":["Film Studies"],"Accounting & Finance":["Accounting"],"Fine Art":["History of Art"],"Music":["Music Technology"],"Drama & Theatre":["Dance"],"Geology / Earth Sciences":["Geology"],"Environmental Science":["Environmental Science"]};
+const expand = list => [...new Set(list.flatMap(x => FAMILY[x] || [x]))];
+
+// Vocational pathways: routes = courses where some unis accept this instead of the A-level subject requirement; related = courses it suits well
+const PATHS = {
+  science:   {routes:["Biomedical Science","Biology","Forensic Science","Zoology","Marine Biology","Environmental Science","Sport & Exercise Science","Nutrition & Dietetics"], related:["Nursing","Midwifery","Paramedic Science","Physiotherapy","Optometry"], note:"Usually at unis with BBB to CCC offers. Higher-ranked unis normally want A-level Biology or Chemistry."},
+  health:    {routes:[], related:["Nursing","Midwifery","Paramedic Science","Social Work","Psychology","Sociology","Primary Education"]},
+  business:  {routes:[], related:["Business & Management","Accounting & Finance","Economics","Law"]},
+  it:        {routes:["Computer Science"], related:["Games Design","Data Science"], note:"Some unis accept it, but most Computer Science courses want A-level Maths."},
+  engineering:{routes:["Mechanical Engineering","Electrical & Electronic Engineering","Civil Engineering","Aerospace Engineering"], related:["Product Design","Architecture"], note:"Many unis also want A-level Maths or Distinctions in the maths units."},
+  sport:     {routes:["Sport & Exercise Science","Physiotherapy"], related:["Paramedic Science","Primary Education"], note:"For Physiotherapy, most unis want science units in it, or A-level Biology."},
+  psych:     {routes:[], related:["Psychology","Criminology","Sociology"]},
+  law:       {routes:[], related:["Law","Criminology"]},
+  media:     {routes:[], related:["Film & Media","Journalism","Games Design","Graphic Design & Illustration"]},
+  art:       {routes:["Fine Art","Graphic Design & Illustration","Product Design"], related:["Architecture","Games Design"], note:"You'll also need a portfolio."},
+  performing:{routes:[], related:["Drama & Theatre","Music"]},
+  music:     {routes:["Music"], related:["Drama & Theatre"], note:"Some unis accept it, usually with an audition and music theory."},
+  childcare: {routes:[], related:["Primary Education","Social Work","Psychology"]},
+  uniformed: {routes:[], related:["Criminology","Paramedic Science","Sport & Exercise Science"]},
+  construction:{routes:["Civil Engineering"], related:["Architecture"], note:"Many unis also want A-level Maths."},
+  forensic:  {routes:["Forensic Science"], related:["Criminology","Biomedical Science"], note:"Usually at unis with BBB to CCC offers."},
+  animal:    {routes:["Zoology"], related:["Marine Biology","Biology"], note:"Usually at unis with BBB to CCC offers."},
+  travel:    {routes:[], related:["Business & Management"]},
+  education: {routes:[], related:["Primary Education","Social Work","Psychology"]},
+  finance:   {routes:[], related:["Accounting & Finance","Business & Management","Economics"]},
+  admin:     {routes:[], related:["Business & Management"]},
+  agriculture:{routes:["Environmental Science"], related:["Biology","Zoology"], note:"Usually at unis with BBB to CCC offers."},
+  craft:     {routes:["Product Design"], related:["Fine Art","Graphic Design & Illustration"], note:"You'll also need a portfolio."},
+  crim:      {routes:[], related:["Criminology","Law","Sociology","Psychology"]},
+  extra:     {routes:[], related:[]}
+};
+const VOC = {
+  btec: {label:"BTEC", long:"BTEC National", blurb:"Practical, coursework-heavy courses. You'll pick the size you're taking in step 2.", subjects:[
+    ["Applied Science","science"],["Health & Social Care","health"],["Business","business"],["Information Technology","it"],["Computing","it"],["Engineering","engineering"],["Sport & Exercise Science","sport"],["Sport","sport"],["Applied Psychology","psych"],["Applied Law","law"],["Creative Digital Media Production","media"],["Art & Design","art"],["Performing Arts","performing"],["Music Performance","music"],["Music Technology","music"],["Children's Play, Learning & Development","childcare"],["Uniformed Protective Services","uniformed"],["Construction & the Built Environment","construction"],["Forensic & Criminal Investigation","forensic"],["Animal Management","animal"],["Travel & Tourism","travel"]]},
+  ctec: {label:"Cambridge Technical", long:"OCR Cambridge Technical (CTEC)", blurb:"OCR's vocational courses. Sized and graded like BTECs.", subjects:[
+    ["Applied Science","science"],["Health & Social Care","health"],["Business","business"],["IT","it"],["Engineering","engineering"],["Sport & Physical Activity","sport"],["Digital Media","media"],["Art & Design","art"],["Performing Arts","performing"]]},
+  tl: {label:"T Level", long:"T Level", blurb:"A two-year course the size of 3 A-levels, with a 45-day industry placement.", subjects:[
+    ["Health","health"],["Healthcare Science","science"],["Science","science"],["Digital Production, Design & Development","it"],["Digital Support Services","it"],["Education & Early Years","education"],["Engineering & Manufacturing Design","engineering"],["Design, Surveying & Planning for Construction","construction"],["Legal Services","law"],["Finance","finance"],["Accounting","finance"],["Management & Administration","admin"],["Media, Broadcast & Production","media"],["Animal Care & Management","animal"],["Agriculture, Land Management & Production","agriculture"],["Craft & Design","craft"]]},
+  x: {label:"Other", long:"Other qualifications", blurb:"Extras that sit alongside your main subjects, plus the WJEC Criminology diploma.", subjects:[
+    ["Extended Project (EPQ)","extra"],["Core Maths","extra"],["Criminology (WJEC Applied Diploma)","crim"]]}
+};
+const TABS = [["al","A-levels"],["btec","BTEC"],["ctec","Cambridge Technicals"],["tl","T Levels"],["x","Other"]];
+
+const PTS = {"A*":56,"A":48,"B":40,"C":32,"D":24,"E":16};
+const GRADES = ["A*","A","B","C","D","E"];
+const AL_OPTS = GRADES.map(g => [g, PTS[g]]);
+const VOC_OPTS = {
+  1: [["D*",56],["D",48],["M",32],["P",16]],
+  2: [["D*D*",112],["D*D",104],["DD",96],["DM",80],["MM",64],["MP",48],["PP",32]],
+  3: [["D*D*D*",168],["D*D*D",160],["D*DD",152],["DDD",144],["DDM",128],["DMM",112],["MMM",96],["MMP",80],["MPP",64],["PPP",48]]
+};
+const SIZE_NAMES = {1:"Extended Certificate (1 A-level)",2:"Diploma (2 A-levels)",3:"Extended Diploma (3 A-levels)"};
+const TL_OPTS = [["Distinction*",168],["Distinction",144],["Merit",120],["Pass (C or above)",96],["Pass (D or E)",72]];
+const EPQ_OPTS = [["A*",28],["A",24],["B",20],["C",16],["D",12],["E",8]];
+const CORE_OPTS = [["A",20],["B",16],["C",12],["D",10],["E",6]];
+const VOC_CAUTION = new Set(["Cambridge","Oxford","Imperial College London","LSE","UCL","Durham","Warwick","St Andrews","Bristol","Edinburgh"]);
+
+// Catalogue of everything you can pick
+const CATALOG = {};
+ALEVEL_GROUPS.forEach(([cat, subs]) => subs.forEach(n => CATALOG["al:" + n] = {id:"al:" + n, type:"al", name:n, label:n, badge:"A-level", cat}));
+Object.entries(VOC).forEach(([t, v]) => v.subjects.forEach(([n, key]) => {
+  const id = t + ":" + n;
+  CATALOG[id] = {id, type:t, name:n, key, path:PATHS[key], label: t === "x" ? n : `${v.label} ${n}`, badge: v.label, cat: KEY_CAT[key]};
+}));
+function sizeOf(it){
+  if (it.type === "al") return 1;
+  if (it.type === "tl") return 3;
+  if (it.type === "btec" || it.type === "ctec") return state.sizes[it.id] || 1;
+  if (it.name.startsWith("Criminology")) return 1;
+  return 0; // EPQ, Core Maths are extras
+}
+function gradeOpts(it){
+  if (it.type === "al") return AL_OPTS;
+  if (it.type === "tl") return TL_OPTS;
+  if (it.type === "btec" || it.type === "ctec") return VOC_OPTS[sizeOf(it)];
+  if (it.name.startsWith("Extended Project")) return EPQ_OPTS;
+  if (it.name === "Core Maths") return CORE_OPTS;
+  return AL_OPTS;
+}
+
+const AREA_DOT = {"Health":"var(--accent)","Science":"var(--mint)","Engineering & Tech":"var(--sky)","Maths & Money":"var(--sun)","Humanities":"var(--lilac)","Social Sciences":"var(--lilac)","Creative":"var(--accent)","People & Education":"var(--mint)"};
+const SCI = ["Biology","Chemistry","Physics","Maths"];
+const SCI2 = ["Chemistry","Physics","Maths","Geography","Psychology","Environmental Science","Geology"];
+
+// [name, area, required groups (each group = pick one, distinct subjects), helpful, universities "Uni GRADES (note); ...", about, careers, extra, checked-for-2027]
+const COURSES = [
+ ["Medicine","Health",[["Chemistry"],["Biology"]],["Maths","Physics","Psychology"],"Cambridge A*A*A (Chemistry + two of Biology, Maths, Physics); Oxford A*AA (Chemistry + one of Biology, Maths, Physics); Imperial College London A*AA; UCL A*AA; King's College London A*AA; Exeter A*AA; Leicester A*AA (the A* must be in a science); Keele A*AA; Aston A*AA; Birmingham AAA; Bristol AAA; Edinburgh AAA; Leeds AAA; Manchester AAA; Nottingham AAA; Sheffield AAA; Lincoln AAA (Biology needed, Chemistry not essential); Hull York Medical School AAA (or AAB + A in the EPQ); Kent and Medway Medical School AAB; Buckingham ABB (private uni with higher fees)","How the body works, diagnosing illness and treating patients. Usually 5 to 6 years.","Doctor (GP, surgeon, psychiatrist and more), medical researcher","Extra hurdles: UCAT admissions test, interview, and work experience in a caring role.",true],
+ ["Dentistry","Health",[["Chemistry"],["Biology"]],["Maths","Physics"],"King's College London A*AA; Birmingham AAA; Bristol AAA; Cardiff AAA; Leeds AAA; Liverpool AAA; Manchester AAA; Newcastle AAA; Sheffield AAA","Oral health, anatomy and hands-on clinical skills. 5 years.","Dentist, orthodontist, oral surgeon","Extra hurdles: UCAT and interview."],
+ ["Veterinary Medicine","Health",[["Chemistry"],["Biology"]],["Maths","Physics"],"Cambridge A*A*A; Bristol A*AA; Royal Veterinary College AAA; Edinburgh AAA; Glasgow AAA; Liverpool AAA; Nottingham AAA; Surrey AAB; Harper & Keele AAB","Animal health, surgery and disease across pets, farm animals and wildlife. 5 years.","Vet, zoo or wildlife vet, animal health researcher","Extra hurdles: weeks of animal work experience and an interview."],
+ ["Pharmacy","Health",[["Chemistry"],["Biology","Maths","Physics"]],["Biology"],"UCL AAA; Bath AAB; King's College London AAB; Manchester AAB; Nottingham AAB; Reading ABB; De Montfort BBB; Bradford BBC","How medicines are made and how they work in the body. 4-year MPharm.","Pharmacist in hospitals, high-street or industry",""],
+ ["Nursing","Health",[],["Biology","Psychology","Sociology","PE"],"King's College London BBC (Interview required. GCSE English, Maths, Science at 4. Must be 18 by 1 Nov.); Birmingham BBB (Interview required. Five GCSEs at 4 incl. English, Maths, Science.); Leeds BBC (Online interview. GCSE English, Maths, Science at 4.); Manchester BBC (Interview if shortlisted.); Nottingham BBB (Interview required.); Southampton BBC (Selection event. GCSE English, Maths, Science at 4.); De Montfort BBC (Online interview. Work experience or transferable skills needed.); Lincoln BBC (Interview required.); Sheffield Hallam BCC (Online interview.)","Adult, children's or mental health nursing, with half your time on placements.","Nurse, specialist nurse, health visitor","Extra hurdles: values-based interview. Some unis ask for a science."],
+ ["Midwifery","Health",[],["Biology","Psychology","Sociology"],"King's College London ABB; Leeds ABB; Nottingham ABB; Southampton ABB; De Montfort BBC; Lincoln BBC; Sheffield Hallam BBC","Caring for people through pregnancy, birth and the weeks after.","Midwife, specialist midwife","Extra hurdles: interview. Many unis prefer Biology."],
+ ["Physiotherapy","Health",[["Biology","PE"]],["Psychology","Chemistry","Physics"],"King's College London AAA; Birmingham AAB; Nottingham AAB; Southampton AAB; Cardiff ABB; Keele ABB; Sheffield Hallam BBB","Helping people recover movement after injury or illness.","Physiotherapist in the NHS, sport or private practice","Extra hurdles: interview and some observation experience."],
+ ["Paramedic Science","Health",[],["Biology","PE","Psychology"],"Swansea ABB; Hertfordshire BBB; Coventry BBC; Lincoln BBC; Sheffield Hallam BBC","Emergency care skills, with placements on ambulances.","Paramedic, critical care paramedic","Extra hurdles: fitness test and interview."],
+ ["Optometry","Health",[SCI,SCI],["Physics"],"Manchester AAA; Aston AAB; Cardiff AAB; City St George's AAB; Bradford BBB","The science of eyes and vision, plus clinical practice.","Optometrist, eye-care researcher",""],
+ ["Nutrition & Dietetics","Health",[["Biology","Chemistry"]],["Chemistry","Biology","PE"],"King's College London AAB; Nottingham AAB; Leeds Beckett BBB; Coventry BBC","How food affects health, and planning diets for patients.","Dietitian, nutritionist, public health",""],
+ ["Biomedical Science","Health",[["Biology"],["Chemistry","Physics","Maths"]],["Psychology"],"King's College London AAA; Manchester AAB; Sheffield AAB; Leicester ABB; Nottingham Trent BBB; De Montfort BBC; Lincoln BBC","The lab science behind diagnosing and treating disease.","Biomedical scientist, researcher, graduate-entry medicine",""],
+ ["Biology","Science",[["Biology"],SCI2],["Chemistry"],"Oxford AAA; Imperial College London AAA; UCL AAA; Bristol AAA; Exeter AAA; Leeds AAA; Sheffield AAB; Leicester ABB; Lincoln BBC; Nottingham Trent BBC","Living things from cells and genes to whole ecosystems.","Researcher, conservation, science communication, teaching",""],
+ ["Biochemistry","Science",[["Chemistry"],["Biology"]],["Maths"],"Oxford A*A*A; Imperial College London A*AA; Bristol AAA; Leeds AAA; Manchester AAB; Sheffield AAB; Leicester ABB; Lincoln BBC","The chemistry of life: proteins, DNA and how cells work.","Pharma research, biotech, forensic labs",""],
+ ["Chemistry","Science",[["Chemistry"],["Maths","Physics","Biology"]],["Maths"],"Oxford A*A*A; Imperial College London A*AA; Durham A*AA; Bristol A*AA; Manchester AAA; Nottingham AAA; York AAA; Leicester ABB; Lincoln BBC","How substances react, from new materials to medicines.","Chemist, pharma, energy, materials",""],
+ ["Physics","Science",[["Physics"],["Maths"]],["Further Maths"],"Cambridge A*A*A (as Natural Sciences); Imperial College London A*A*A; Oxford A*AA (plus PAT test); Durham A*AA; Manchester A*AA; Bristol A*AA; Nottingham AAA; Surrey AAB; Leicester ABB","The rules of the universe, from particles to black holes.","Researcher, engineer, data scientist, finance",""],
+ ["Astrophysics","Science",[["Physics"],["Maths"]],["Further Maths"],"UCL A*AA; Manchester A*AA; Edinburgh AAA; Sussex AAB; Leicester ABB; Hertfordshire BBB","Physics applied to stars, galaxies and the cosmos.","Astronomer, space industry, data science",""],
+ ["Natural Sciences","Science",[SCI,SCI],["Further Maths","Chemistry"],"Cambridge A*A*A; Durham A*AA; UCL A*AA; Bath AAA; Exeter AAA; Lancaster AAA; Leeds AAA; Nottingham AAA","Study several sciences at once, then specialise.","Research, engineering, consulting, teaching",""],
+ ["Zoology","Science",[["Biology"],SCI2],["Geography"],"Bristol AAA; Exeter AAA; Leeds AAA; Manchester AAB; Nottingham AAB; Bangor BBC; Nottingham Trent BBC","Animal behaviour, evolution and ecology.","Zoo or conservation work, wildlife research",""],
+ ["Marine Biology","Science",[["Biology"],SCI2],["Geography"],"St Andrews AAA; Exeter AAA; Newcastle AAB; Southampton AAB; Bangor BBC; Hull BBC; Plymouth BBC","Life in the oceans, with field trips and boat work.","Marine conservation, aquarium science, fisheries",""],
+ ["Neuroscience","Science",[["Biology"],["Chemistry","Physics","Maths","Psychology"]],["Psychology"],"Bristol AAA; Edinburgh AAA; King's College London AAA; Manchester AAB; Sussex AAB; Keele ABB","How the brain and nervous system work.","Brain research, pharma, graduate-entry medicine",""],
+ ["Forensic Science","Science",[["Chemistry"],["Biology","Physics","Maths"]],["Biology"],"Keele ABB; Kent ABB; Lincoln BBC; Nottingham Trent BBC; Staffordshire CCC","Using lab science to analyse crime-scene evidence.","Forensic scientist, police labs, analysis",""],
+ ["Environmental Science","Science",[["Biology","Chemistry","Physics","Geography","Maths"]],["Geography","Biology"],"Exeter AAA; East Anglia AAB; Lancaster AAB; Leeds AAB; Southampton AAB; Plymouth BBC","Climate, pollution and protecting the planet.","Environmental consultant, sustainability, policy",""],
+ ["Geology / Earth Sciences","Science",[["Biology","Chemistry","Physics","Maths","Geography"],["Biology","Chemistry","Physics","Maths","Geography"]],["Chemistry","Physics"],"Oxford A*AA; Durham A*AA; Imperial College London AAA; Bristol AAA; Leeds AAB; Manchester AAB; Plymouth BBC","Rocks, volcanoes, earthquakes and Earth's history, with lots of fieldwork.","Geologist, renewable energy, mining, hazard planning",""],
+ ["Mechanical Engineering","Engineering & Tech",[["Maths"],["Physics"]],["Further Maths","Design & Technology"],"Cambridge A*A*A; Imperial College London A*A*A; Oxford A*A*A (plus PAT test); Bath A*AA; Bristol A*AA; Loughborough AAA; Nottingham AAA; Sheffield AAA; Leicester ABB; Nottingham Trent BBC","Designing machines, engines and anything that moves.","Engineer in cars, energy, robotics, manufacturing",""],
+ ["Aerospace Engineering","Engineering & Tech",[["Maths"],["Physics"]],["Further Maths"],"Imperial College London A*A*A; Bath A*AA; Bristol A*AA; Southampton A*AA; Loughborough AAA; Sheffield AAA; Hertfordshire BBC","Designing aircraft, rockets and satellites.","Aerospace engineer, space industry, defence",""],
+ ["Electrical & Electronic Engineering","Engineering & Tech",[["Maths"],["Physics"]],["Further Maths","Computer Science"],"Imperial College London A*A*A; Bristol A*AA; Southampton A*AA; Manchester AAA; Nottingham AAA; Sheffield AAA; Leicester ABB","Circuits, electronics, power and communications.","Electronics engineer, energy, telecoms, tech",""],
+ ["Civil Engineering","Engineering & Tech",[["Maths"]],["Physics","Further Maths","Geography"],"Imperial College London A*AA; Bath A*AA; Bristol A*AA; Leeds AAA; Loughborough AAA; Nottingham AAA; Nottingham Trent BBC","Designing bridges, buildings, transport and water systems.","Civil or structural engineer, construction","Many unis also want a science, usually Physics."],
+ ["Chemical Engineering","Engineering & Tech",[["Maths"],["Chemistry"]],["Physics","Further Maths"],"Cambridge A*A*A; Imperial College London A*A*A; Bath A*AA; Manchester A*AA; Birmingham AAA; Leeds AAA; Loughborough AAA; Nottingham AAA","Turning raw materials into products at large scale.","Process engineer, energy, pharma, food industry",""],
+ ["Computer Science","Engineering & Tech",[["Maths"]],["Further Maths","Computer Science","Physics"],"Cambridge A*A*A (Maths and Further Maths if offered. TMUA test); Imperial College London A*A*A (Course is called Computing. TMUA test. Or A*AAA with four A-levels); Warwick A*A*A (A* in Maths. TMUA test. Further Maths highly recommended); Oxford A*AA (Maths at A*, or A*A across Maths and Further Maths. TMUA test and interview); Bristol A*AA (A* in Maths); Manchester A*AA (A* in Maths, plus one of Computer Science, Further Maths, Biology, Chemistry or Physics); Edinburgh A*A*A* (A in Maths. Offers range from A*A*A* to AAB); Nottingham AAA (Maths not required (GCSE Maths 5). AAB with an A in Computer Science); Leicester AAB (Not checked yet. Its page would not load); Lincoln BBC (Maths not required); Nottingham Trent BBB (An IT, Maths or science subject at C or above)","Programming, algorithms, AI and how computers work.","Software developer, cyber security, AI, games",""],
+ ["Games Design","Engineering & Tech",[],["Computer Science","Art & Design","Maths","Media Studies"],"Abertay BBC; De Montfort BBC; Falmouth BBC; Lincoln BBC; Staffordshire CCC","Creating games, from art and level design to coding.","Game designer, developer, 3D artist","Extra hurdles: a portfolio of your work helps."],
+ ["Data Science","Maths & Money",[["Maths"]],["Further Maths","Computer Science"],"Warwick A*A*A; Bristol A*AA; Lancaster AAA; Sheffield AAB; Coventry BBC","Statistics, coding and finding patterns in big data.","Data scientist, analyst, AI and machine learning",""],
+ ["Mathematics","Maths & Money",[["Maths"]],["Further Maths","Physics"],"Cambridge A*A*A (plus STEP exam); Oxford A*A*A (plus MAT test); Imperial College London A*A*A; Warwick A*A*A; Durham A*A*A; Bath A*AA; Leeds A*AA; Nottingham A*AA; Leicester ABB","Pure and applied maths, statistics and problem solving.","Finance, data, research, teaching, engineering","Top unis usually want Further Maths too."],
+ ["Economics","Maths & Money",[["Maths"]],["Economics","Further Maths"],"Cambridge A*A*A (Maths needed. TMUA test. Some colleges also want Further Maths); LSE A*AA (A* in Maths. Further Maths is useful); UCL A*AA (A* in Maths. TMUA test); Warwick A*AA (A in Maths. Optional TMUA test can lower the offer to AAA); Bristol A*AA (Maths needed); Durham A*AA (Maths needed); Manchester AAA (A in Maths. GCSE Maths grade 6); Nottingham A*AA (Maths not required (needs GCSE Maths 7). AAA if you take Maths); Leicester ABB (Not checked yet. Its page would not load)","How money, markets and governments make choices.","Economist, banking, policy, consulting",""],
+ ["Actuarial Science","Maths & Money",[["Maths"]],["Further Maths","Economics"],"LSE A*AA; City St George's AAA; Southampton AAA; Kent ABB","Using maths to measure risk for insurance and pensions.","Actuary, risk analyst, insurance",""],
+ ["Accounting & Finance","Maths & Money",[],["Maths","Economics","Business"],"LSE A*AA; Bath AAA; Leeds AAA; Warwick AAA; Lancaster AAB; Nottingham Trent BBC","How businesses manage and report their money.","Accountant, auditor, finance analyst","Many unis want at least a 6 or 7 in GCSE Maths."],
+ ["Business & Management","Maths & Money",[],["Business","Economics","Maths"],"LSE AAA (Course is BSc Management. A in Maths); Bath AAA (Course is BSc Business. Or A*AB. GCSE Maths grade 6); Leeds AAA (Uni's page not yet updated for 2027); Warwick A*AA (GCSE Maths grade 7); Lancaster AAB (Not checked yet. Its page would not load); Loughborough AAB (Course is BSc Management); Nottingham Trent BBC (Course is BA Business); Sheffield Hallam BCC","Marketing, leadership, finance and running organisations.","Management, marketing, start-ups, HR",""],
+ ["Law","Social Sciences",[],["History","English Literature","Politics","Law","Religious Studies"],"Cambridge A*AA (LNAT test); LSE A*AA (LNAT test); UCL A*AA (LNAT test. Two A-levels from UCL's preferred list); King's College London A*AA (LNAT test); Durham A*AA; Nottingham AAA (Usually only one practical subject, like Art, Drama or PE. 2026 entry figure, 2027 not published yet); Oxford AAA (LNAT test and interview); Leeds A*AA (Two A-levels must be traditional academic subjects. Uni's page not yet updated for 2027); Leicester AAB (Or ABB plus a B in the EPQ. 2026 entry figure, 2027 not published yet); Nottingham Trent BBB; Lincoln BBC","How laws work and how to argue a case.","Solicitor, barrister, policy, business","Extra hurdles: many top unis use the LNAT admissions test."],
+ ["Psychology","Social Sciences",[],["Psychology","Biology","Maths"],"Oxford A*AA (Course is Experimental Psychology. TARA test and interview); UCL A*AA (A*A in two of Biology, Chemistry, Maths, Physics, Psychology); Bath A*AA (GCSE Maths grade 7 needed); Bristol A*AA (A in a science, Maths, Psychology, Geography or Computer Science); Exeter AAA (A in a science, Maths, Psychology, Geography or Economics); Leeds AAA (Needs one of Psychology, a science, Maths, Geography, Economics or Computing. 2026 entry figure, 2027 not published yet); Nottingham AAA; Sheffield AAB (Needs a science, Maths, Psychology, Geography or Statistics); Nottingham Trent BBB; Lincoln BBB","Why people think, feel and behave the way they do.","Clinical or educational psychologist, HR, research","Some unis prefer one science or Maths."],
+ ["Sociology","Social Sciences",[],["Sociology","Psychology","Politics"],"Cambridge A*AA (as HSPS); LSE AAA; Leeds AAB; Nottingham AAB; Manchester ABB; Nottingham Trent BBC","How society shapes our lives, from class to culture.","Social research, charities, policy, HR",""],
+ ["Criminology","Social Sciences",[],["Sociology","Psychology","Law"],"Leeds AAB; Manchester AAB; Kent ABB; Leicester ABB; Nottingham Trent BBC; Sheffield Hallam BCC","Why crime happens and how society responds.","Police, probation, youth work, research",""],
+ ["Politics & International Relations","Social Sciences",[],["Politics","History","Economics"],"LSE A*AA; UCL A*AA; Oxford AAA (as PPE); Exeter AAA; Warwick AAA; Leeds AAB; Nottingham AAB; Sheffield ABB; Lincoln BBC","Power, government and how countries deal with each other.","Civil service, journalism, campaigning, diplomacy",""],
+ ["Social Work","People & Education",[],["Sociology","Psychology"],"Leeds AAB; Nottingham ABB; De Montfort BBC; Lincoln BBC; Sheffield Hallam BBC","Supporting children, families and adults through tough times.","Social worker, family support","Extra hurdles: interview and relevant experience."],
+ ["Primary Education","People & Education",[],["English Literature","Maths","Psychology"],"Nottingham Trent BBB; Sheffield Hallam BBB; Bishop Grosseteste BBC; Edge Hill BBC","Training to teach 5 to 11 year olds, with school placements.","Primary school teacher","Extra hurdles: GCSE English, Maths and Science at grade 4+, plus an interview."],
+ ["Sport & Exercise Science","People & Education",[["PE","Biology","Chemistry","Physics","Psychology","Maths"]],["PE","Biology"],"Bath AAA; Birmingham AAA; Exeter AAA; Loughborough AAA; Leeds Beckett BBC; Nottingham Trent BBC","How the body performs, trains and recovers.","Sports scientist, coaching, fitness, teaching PE",""],
+ ["Geography","Humanities",[],["Geography","Biology","Maths"],"Cambridge A*AA; Oxford A*AA; UCL A*AA; Durham A*AA; Exeter AAA; Leeds AAA; Nottingham AAA; Sheffield AAB; Leicester ABB","People, places and the planet: cities, climate and landscapes.","Planning, environment, GIS mapping, policy","Most unis strongly prefer A-level Geography."],
+ ["History","Humanities",[["History"]],["English Literature","Politics"],"Cambridge A*AA; UCL A*AA; Durham A*AA; Oxford AAA (plus HAT test); Exeter AAA; Leeds AAA; Nottingham AAA; Warwick AAA; Sheffield AAB; Lincoln BBC","Investigating the past and how it shapes today.","Museums, journalism, law, civil service",""],
+ ["English Literature","Humanities",[["English Literature","English Language"]],["History","Drama"],"Cambridge A*AA; UCL A*AA; Durham A*AA; Oxford AAA; Exeter AAA; Leeds AAA; Nottingham AAA; Warwick AAA; Leicester ABB","Reading and writing about novels, poetry and plays.","Publishing, journalism, teaching, marketing","Most unis want English Literature or Language & Literature."],
+ ["Philosophy","Humanities",[],["Philosophy","Religious Studies","Maths","History"],"Cambridge A*AA; UCL A*AA; Oxford AAA (as PPE); King's College London AAA; St Andrews AAA; Warwick AAA; Leeds AAB; Nottingham AAB; Sheffield ABB","Big questions about ethics, knowledge and reality.","Law, policy, writing, tech ethics",""],
+ ["Modern Languages","Humanities",[LANGS],["English Literature"],"Cambridge A*AA; Durham A*AA; Oxford AAA; Bristol AAA; UCL AAA; Leeds AAB; Nottingham AAB; Sheffield ABB","Language skills plus culture, with a year abroad.","Translation, diplomacy, international business","You can often start a second language from scratch."],
+ ["Classics","Humanities",[],["Classics","History","English Literature"],"Cambridge A*AA; Durham A*AA; Oxford AAA; King's College London AAA; Exeter AAA; Nottingham AAB","Ancient Greece and Rome: history, myths and languages.","Museums, law, teaching, publishing","Latin or Greek A-level helps for some courses."],
+ ["Theology & Religion","Humanities",[],["Religious Studies","Philosophy","History"],"Cambridge A*AA; Durham A*AA; Oxford AAA; Exeter AAB; Nottingham AAB; Leeds ABB","World religions, ethics and belief.","Teaching, charities, chaplaincy, policy",""],
+ ["Architecture","Creative",[],["Art & Design","Maths","Physics","Design & Technology"],"Cambridge A*AA; UCL A*AA; Bath A*AA; Nottingham AAA; Sheffield AAA; Liverpool AAB; Manchester AAB; Lincoln BBC; Nottingham Trent BBC","Designing buildings and spaces. Leads towards becoming an architect.","Architect, urban designer, interior design","Extra hurdles: a portfolio of drawings and design work."],
+ ["Fine Art","Creative",[["Art & Design"]],[],"Oxford AAA; Leeds AAB; Goldsmiths BBB; Lincoln BBC; Nottingham Trent BBC","Painting, sculpture, photography and your own creative practice.","Artist, curator, art teacher, creative industries","Extra hurdles: portfolio. Many students do a one-year Art Foundation first."],
+ ["Graphic Design & Illustration","Creative",[["Art & Design"]],["Media Studies","Design & Technology"],"De Montfort BBC; Falmouth BBC; Leeds Arts University BBC; Lincoln BBC; Nottingham Trent BBC","Visual communication for brands, books and screens.","Graphic designer, illustrator, UX designer","Extra hurdles: portfolio."],
+ ["Product Design","Creative",[["Design & Technology","Art & Design"]],["Physics","Maths"],"Loughborough AAB; Brunel ABB; De Montfort BBC; Nottingham Trent BBC","Designing everyday objects people use.","Product designer, UX, manufacturing","Extra hurdles: portfolio."],
+ ["Music","Creative",[["Music"]],[],"Cambridge A*AA; Durham A*AA; Oxford AAA; King's College London AAB; Leeds AAB; Nottingham AAB; Huddersfield BBC","Performance, composition and music theory.","Performer, composer, music producer, teaching","Extra hurdles: often Grade 8 on an instrument and an audition."],
+ ["Drama & Theatre","Creative",[],["Drama","English Literature"],"Bristol AAA; Exeter AAB; Leeds AAB; Royal Holloway AAB; Warwick AAB; Lincoln BBC","Acting, directing and making theatre.","Actor, director, drama teacher, arts management","Extra hurdles: auditions, especially at drama schools."],
+ ["Film & Media","Creative",[],["Media Studies","English Literature","Art & Design"],"Leeds AAB; Warwick AAB; Kent ABB; Lincoln BBC; Nottingham Trent BBC","Making and analysing film, TV and digital media.","Film-maker, content creator, producer, marketing",""],
+ ["Journalism","Creative",[],["English Literature","English Language","Media Studies","Politics"],"Cardiff AAB; City St George's AAB; Leeds AAB; Sheffield AAB; Lincoln BBC; Nottingham Trent BBC","Reporting, writing and storytelling across media.","Journalist, editor, PR, social media",""]
+];
+
+// Courses checked uni by uni against each university's own course page: checked date, then uni -> course page URL
+const SOURCES = {
+  "Psychology": {date: "19 October 2026", unis: {"Oxford": "https://ox.ac.uk/ugpsych", "UCL": "https://www.ucl.ac.uk/study/prospective-students/undergraduate/courses/psychology-bsc", "Bath": "https://www.bath.ac.uk/courses/undergraduate-2027/psychology/bsc-psychology", "Bristol": "https://www.bristol.ac.uk/study/undergraduate/2027/psychology/bsc-psychology/", "Exeter": "https://www.exeter.ac.uk/undergraduate-degrees/bsc-psychology/", "Leeds": "https://courses.leeds.ac.uk/3670/psychology_bsc", "Nottingham": "https://www.nottingham.ac.uk/studywithus/ugstudy/courses/UG/Psychology-BSc-Hons.html", "Sheffield": "https://sheffield.ac.uk/undergraduate/courses/2027/psychology-bsc", "Nottingham Trent": "https://www.ntu.ac.uk/course/social-sciences/ug/bsc-hons-psychology", "Lincoln": "https://www.lincoln.ac.uk/course/psypsyub/"}},
+  "Law": {date: "19 October 2026", unis: {"Cambridge": "https://www.undergraduate.study.cam.ac.uk/courses/law-ba-hons", "LSE": "https://www.lse.ac.uk/study-at-lse/undergraduate/llb-bachelor-of-laws", "UCL": "https://www.ucl.ac.uk/study/prospective-students/undergraduate/courses/law-llb", "King's College London": "https://www.kcl.ac.uk/study/undergraduate/courses/law-llb/entry-requirements", "Durham": "https://dur.ac.uk/study/courses/law-m101/", "Nottingham": "https://nottingham.ac.uk/studywithus/ugstudy/courses/UG/2026/Law-LLB-Hons-U6ULAWLB.html", "Oxford": "https://www.ox.ac.uk/law-jurisprudence", "Leeds": "https://courses.leeds.ac.uk/3010/law-llb", "Leicester": "https://le.ac.uk/courses/law-llb/2026", "Nottingham Trent": "https://www.ntu.ac.uk/course/nottingham-law-school/ug/llb-law-full-time?year=2027", "Lincoln": "https://www.lincoln.ac.uk/course/lawlawub/"}},
+  "Computer Science": {date: "19 October 2026", unis: {"Cambridge": "https://www.undergraduate.study.cam.ac.uk/courses/computer-science-ba-hons-meng", "Imperial College London": "https://www.imperial.ac.uk/study/courses/undergraduate/computing-beng/", "Warwick": "https://warwick.ac.uk/study/undergraduate/courses/bsc-computer-science/", "Oxford": "https://www.ox.ac.uk/admissions/undergraduate/courses/course-listing/computer-science", "Bristol": "https://www.bristol.ac.uk/study/undergraduate/2027/computer-science/bsc-computer-science/", "Manchester": "https://www.manchester.ac.uk/study/undergraduate/courses/2027/00560/bsc-computer-science/", "Edinburgh": "https://study.ed.ac.uk/programmes/undergraduate/57-computer-science/entry-requirements", "Nottingham": "https://www.nottingham.ac.uk/studywithus/ugstudy/courses/UG/Computer-Science-BSc-Hons.html", "Lincoln": "https://www.lincoln.ac.uk/course/cmpcmsub/", "Nottingham Trent": "https://www.ntu.ac.uk/course/science-and-technology/ug/bsc-hons-computer-science"}},
+  "Nursing": {date: "19 October 2026", unis: {"King's College London": "https://www.kcl.ac.uk/study/undergraduate/courses/nursing-with-registration-as-an-adult-nurse-bsc/entry-requirements", "Birmingham": "https://www.birmingham.ac.uk/study/undergraduate/subjects/medicine-courses/nursing-bnurs-adult", "Leeds": "https://courses.leeds.ac.uk/h820/nursing-adult-bsc", "Manchester": "https://www.manchester.ac.uk/study/undergraduate/courses/2026/10971/bnurs-adult-nursing", "Nottingham": "https://www.nottingham.ac.uk/studywithus/ugstudy/courses/UG/Nursing-Adult-BSc-Hons.html", "Southampton": "https://www.southampton.ac.uk/courses/nursing-adult-degree-bsc", "De Montfort": "https://www.dmu.ac.uk/study/courses/undergraduate-courses/nursing-with-registration-adult-nursing-degree/nursing-with-registration-adult-nursing-bsc-hons.aspx", "Lincoln": "https://www.lincoln.ac.uk/course/nurnurub/", "Sheffield Hallam": "https://www.shu.ac.uk/courses/nursing-and-midwifery/bsc-honours-nursing-adult/full-time/2027"}},
+  "Economics": {date: "19 October 2026", unis: {"Cambridge": "https://www.undergraduate.study.cam.ac.uk/courses/economics-ba-hons", "LSE": "https://www.lse.ac.uk/study-at-lse/undergraduate/bsc-economics", "UCL": "https://www.ucl.ac.uk/study/prospective-students/undergraduate/courses/economics-bsc-econ", "Warwick": "https://warwick.ac.uk/study/undergraduate/courses/bsc-economics/", "Bristol": "https://www.bristol.ac.uk/study/undergraduate/2027/economics/bsc-economics/", "Durham": "https://www.durham.ac.uk/business/courses/economics-l100/", "Manchester": "https://www.manchester.ac.uk/study/undergraduate/courses/2027/10224/bsc-economics/", "Nottingham": "https://www.nottingham.ac.uk/studywithus/ugstudy/courses/UG/Economics-BSc-Hons.html"}},
+  "Business & Management": {date: "19 October 2026", unis: {"LSE": "https://lse.ac.uk/study-at-lse/undergraduate/bsc-management", "Bath": "https://www.bath.ac.uk/courses/undergraduate-2027/business-and-management/bsc-business-with-work-placement/", "Leeds": "https://courses.leeds.ac.uk/i475/business-management-ba", "Warwick": "https://www.wbs.ac.uk/courses/undergraduate/bsc-business-management/requirements/", "Loughborough": "https://www.lboro.ac.uk/study/undergraduate/courses/a-z/management/", "Nottingham Trent": "https://www.ntu.ac.uk/course/nottingham-business-school/ug/ba-hons-business", "Sheffield Hallam": "https://www.shu.ac.uk/courses/business-and-management/ba-honours-business-management/full-time"}}
+};
+// What the checked course pages showed about required subjects, where it varies by uni
+const NEEDS_NOTE = {
+  "Psychology": "at some unis, but most of the top ones want a science or Maths.",
+  "Computer Science": "at most unis, often at A*. A few don't ask for it.",
+  "Economics": "at almost every uni. Nottingham doesn't ask for it.",
+  "Nursing": "at most unis. Manchester asks for a science or social science.",
+  "Business & Management": "at most unis. LSE wants an A in Maths."
+};
+const srcLink = (c, u) => { const s = SOURCES[c] && SOURCES[c].unis[u.name]; return s ? `<a class="un" href="${s[0]}" target="_blank" rel="noopener">${u.name}</a>` : `<span class="un">${u.name}</span>`; };
+
+const SCALE_MIN = 80, SCALE_MAX = 168;
+const gradePts = s => (s.match(/A\*|[A-E]/g) || []).reduce((t,g)=>t+PTS[g],0);
+const COURSE_LIST = COURSES.map(([name, area, req0, helpful0, uniStr, about, careers, extra, checked]) => {
+  const req = req0.map(g => expand([...g, ...(REQ_ADD[name] || [])]));
+  const helpful = expand([...helpful0, ...(HELP_ADD[name] || [])]).filter(h => !req.flat().includes(h));
+  const unis = uniStr.split(";").map(x => x.trim().match(/^(.+?)\s+((?:A\*|[A-E]){3})(?:\s+\((.+)\))?$/))
+    .map(mm => ({name: mm[1], g: mm[2], note: mm[3] || "", pts: gradePts(mm[2])}))
+    .sort((a,b) => b.pts - a.pts || a.name.localeCompare(b.name));
+  return {name, area, req, helpful, unis, top: unis[0].g, low: unis[unis.length-1].g, about, careers, extra, checked: !!checked};
+});
+const ALL_UNIS = [...new Set(COURSE_LIST.flatMap(c => c.unis.map(u => u.name)))].sort((a,b) => a.localeCompare(b));
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"-");
+
+// Carry saved picks and colour scheme over from the old storage names
+try {
+  [["uni-route-finder","flopath"],["uni-route-finder-palette","flopath-palette"]].forEach(([from, to]) => {
+    const old = localStorage.getItem(from);
+    if (old !== null && localStorage.getItem(to) === null) localStorage.setItem(to, old);
+    localStorage.removeItem(from);
+  });
+} catch(e){}
+
+let state = {chosen:["al:Biology","al:Chemistry","al:Physics"], grades:{"al:Biology":"A","al:Chemistry":"A","al:Physics":"B"}, sizes:{}, tab:"al", area:"All", unis:[]};
+try {
+  const saved = JSON.parse(localStorage.getItem("flopath") || "null");
+  if (saved && Array.isArray(saved.chosen)) {
+    const OLD = {"Drama":"Drama & Theatre","Art & Design":"Fine Art","Classics":"Classical Civilisation"};
+    const fix = id => id.includes(":") ? id : "al:" + (OLD[id] || id);
+    const grades = {};
+    Object.entries(saved.grades || {}).forEach(([k, v]) => grades[fix(k)] = v);
+    state = {...state, ...saved, chosen: saved.chosen.map(fix).filter(id => CATALOG[id]), grades, sizes: saved.sizes || {}};
+    if (saved.uni && !Array.isArray(saved.unis)) state.unis = [saved.uni];
+    delete state.uni;
+    if (!Array.isArray(state.unis)) state.unis = [];
+    if (!TABS.some(t => t[0] === state.tab)) state.tab = "al";
+  }
+} catch(e){}
+const save = () => { try { localStorage.setItem("flopath", JSON.stringify(state)); } catch(e){} };
+
+const picks = () => state.chosen.map(id => CATALOG[id]).filter(Boolean);
+const aNames = () => picks().filter(it => it.type === "al").map(it => it.name);
+const usedSize = (except) => picks().filter(it => it.id !== except).reduce((t, it) => t + sizeOf(it), 0);
+const vocPicks = () => picks().filter(it => it.type !== "al" && sizeOf(it) > 0);
+
+// How many required groups can be met with distinct chosen subjects
+function solve(req, chosen){
+  let best = {n:-1, unmet:[]};
+  (function rec(i, used, n, unmet){
+    if (i === req.length){ if (n > best.n) best = {n, unmet:[...unmet]}; return; }
+    for (const s of req[i]) if (chosen.includes(s) && !used.has(s)){ used.add(s); rec(i+1, used, n+1, unmet); used.delete(s); }
+    unmet.push(i); rec(i+1, used, n, unmet); unmet.pop();
+  })(0, new Set(), 0, []);
+  return {missing: req.length - best.n, unmet: best.unmet};
+}
+function reqText(req){
+  if (!req.length) return "No specific subjects required";
+  const short = g => g.length > 4 ? g.slice(0,4).join(" / ") + " or similar" : g.join(" / ");
+  if (req.length === 2 && req[0].join() === req[1].join()) return "Any two of " + req[0].join(", ");
+  return req.map(g => g.length === 1 ? g[0] : "one of " + short(g)).join(" + ");
+}
+function ptsFor(it){ const o = gradeOpts(it).find(x => x[0] === state.grades[it.id]); return o ? o[1] : null; }
+
+// Best combination worth up to 3 A-levels
+function myGrades(){
+  const mains = picks().filter(it => sizeOf(it) > 0);
+  const total = mains.reduce((t, it) => t + sizeOf(it), 0);
+  const graded = mains.filter(it => ptsFor(it) !== null);
+  const gsize = graded.reduce((t, it) => t + sizeOf(it), 0);
+  const extras = picks().filter(it => sizeOf(it) === 0 && ptsFor(it) !== null);
+  const need = Math.min(3, total);
+  if (!need || gsize < need) return {str:"", pts:0, n:0, on:false, extras};
+  let best = {pts:-1, size:0, set:[]};
+  const n = graded.length;
+  for (let mask = 1; mask < (1 << n); mask++){
+    const set = graded.filter((_, i) => mask & (1 << i));
+    const size = set.reduce((t, it) => t + sizeOf(it), 0);
+    if (size > 3) continue;
+    const pts = set.reduce((t, it) => t + ptsFor(it), 0);
+    if (pts > best.pts || (pts === best.pts && size > best.size)) best = {pts, size, set};
+  }
+  const al = best.set.filter(it => it.type === "al").map(it => state.grades[it.id]).sort((a,b) => PTS[b]-PTS[a]).join("");
+  const other = best.set.filter(it => it.type !== "al").map(it => state.grades[it.id]);
+  return {str: [al, ...other].filter(Boolean).join(" + "), pts: best.pts, n: best.size, on:true, extras};
+}
+const pct = p => Math.max(0, Math.min(100, (p - SCALE_MIN) / (SCALE_MAX - SCALE_MIN) * 100));
+
+function toast(msg){ const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove("show"), 2800); }
+
+function toggle(id){
+  const it = CATALOG[id]; if (!it) return;
+  const i = state.chosen.indexOf(id);
+  if (i >= 0) { state.chosen.splice(i,1); delete state.grades[id]; }
+  else {
+    const room = 4 - usedSize();
+    if (it.type === "btec" || it.type === "ctec"){
+      if (room < 1) { toast("You're at the limit of 4 A-levels' worth. Remove something first."); return; }
+      state.sizes[id] = usedSize() === 0 ? 3 : 1;
+    } else if (sizeOf(it) > room) {
+      toast(it.type === "tl" ? "A T Level is the size of 3 A-levels. Remove other subjects to make room." : "You're at the limit of 4 A-levels' worth. Remove something first.");
+      return;
+    }
+    state.chosen.push(id);
+  }
+  save(); render();
+}
+
+const byCat = items => CATS.map(c => [c, items.filter(it => it.cat === c)]).filter(([, l]) => l.length);
+
+function renderPicker(){
+  const ps = picks();
+  const tabs = document.getElementById("qual-tabs");
+  tabs.innerHTML = TABS.map(([t, label]) => {
+    const n = ps.filter(it => it.type === t).length;
+    return `<button type="button" role="tab" class="tab" id="tab-${t}" aria-selected="${t === state.tab}" data-t="${t}">${label}${n ? `<span class="tn">${n}</span>` : ""}</button>`;
+  }).join("");
+  tabs.querySelectorAll(".tab").forEach(b => b.onclick = () => { state.tab = b.dataset.t; save(); renderPicker(); });
+
+  const box = document.getElementById("subject-groups");
+  const chip = it => {
+    const on = state.chosen.includes(it.id);
+    return `<button type="button" class="chip" id="chip-${slug(it.id)}" aria-pressed="${on}" data-id="${it.id}">${it.name}</button>`;
+  };
+  const items = Object.values(CATALOG).filter(it => it.type === state.tab);
+  const blurb = state.tab === "al" ? "" : `<p class="tab-blurb">${VOC[state.tab].blurb}</p>`;
+  box.innerHTML = blurb + byCat(items).map(([cat, list]) => `<div class="group-label">${cat}</div><div class="chips">${list.map(chip).join("")}</div>`).join("");
+  box.querySelectorAll(".chip").forEach(b => b.onclick = () => toggle(b.dataset.id));
+
+  const used = usedSize();
+  document.getElementById("count").textContent = used + "/4";
+  const yp = document.getElementById("your-picks");
+  const pickBtn = it => `<button type="button" class="pick" data-id="${it.id}" aria-label="Remove ${it.label}"><span class="badge">${it.badge}</span>${it.name}<span class="x">✕</span></button>`;
+  yp.innerHTML = ps.length ? `<div class="picks-box"><div class="picks-head">Your picks</div>${byCat(ps).map(([cat, list]) => `<div class="pick-cat">${cat}</div><div class="chips">${list.map(pickBtn).join("")}</div>`).join("")}</div>` : "";
+  yp.querySelectorAll(".pick").forEach(b => b.onclick = () => toggle(b.dataset.id));
+
+  const g = document.getElementById("grades");
+  g.innerHTML = ps.length ? ps.map(it => {
+    const sid = slug(it.id), isVoc = it.type === "btec" || it.type === "ctec";
+    const sizeSel = isVoc ? `<select id="size-${sid}" data-id="${it.id}" class="size-sel" aria-label="Size of ${it.label}">${[1,2,3].map(n => `<option value="${n}"${n === sizeOf(it) ? " selected" : ""}>${SIZE_NAMES[n]}</option>`).join("")}</select>` : "";
+    const gradeSel = `<select id="grade-${sid}" data-id="${it.id}" class="grade-sel" aria-label="Predicted grade for ${it.label}"><option value=""${state.grades[it.id] ? "" : " selected"}>Not sure yet</option>${gradeOpts(it).map(([x]) => `<option${x === state.grades[it.id] ? " selected" : ""}>${x}</option>`).join("")}</select>`;
+    return `<div class="grade-row"><div class="gr-name"><span class="badge">${it.badge}</span>${it.name}${sizeOf(it) === 0 ? `<span class="gr-extra">Extra, not counted in your main grades</span>` : ""}</div><div class="sels">${sizeSel}${gradeSel}</div></div>`;
+  }).join("") : `<p class="empty-grades">Pick a subject above to add your grades.</p>`;
+  g.querySelectorAll(".grade-sel").forEach(sel => sel.onchange = () => { if (sel.value) state.grades[sel.dataset.id] = sel.value; else delete state.grades[sel.dataset.id]; save(); render(); });
+  g.querySelectorAll(".size-sel").forEach(sel => sel.onchange = () => {
+    const id = sel.dataset.id, n = +sel.value;
+    if (usedSize(id) + n > 4) { toast("That would go over 4 A-levels' worth. Remove something first."); sel.value = state.sizes[id]; return; }
+    state.sizes[id] = n; delete state.grades[id]; save(); render();
+  });
+
+  const m = myGrades(), p = document.getElementById("points");
+  p.hidden = !ps.length;
+  p.className = m.on ? "points" : "points off";
+  const extraTxt = m.extras.length ? `<br>Plus ${m.extras.map(it => `${it.name.replace(" (EPQ)","")} ${state.grades[it.id]}`).join(", ")}. Some unis lower their offer for these.` : "";
+  p.innerHTML = m.on
+    ? `<div class="big">${m.pts}</div><div class="small">UCAS points from your best 3 A-levels' worth: <b>${m.str}</b>${m.n < 3 ? "<br>Most offers expect 3 A-levels' worth." : ""}${extraTxt}</div>`
+    : `<div class="small">You can skip this. Add a grade for each main subject and we'll show which university offers you'd meet.</div>`;
+}
+
+function vocRoute(c){
+  for (const it of vocPicks()) if (it.path.routes.includes(c.name)) return {it, note: it.path.note || ""};
+  return null;
+}
+
+function uniStatus(u, pts){
+  if (!myGrades().on) return ["none","•","Add predicted grades to compare"];
+  if (pts >= u.pts) return ["meet","✓","Your grades meet this offer"];
+  if (pts >= u.pts - 8) return ["close","~","One grade off"];
+  return ["reach","↑","Needs higher grades"];
+}
+function pill(k, n){
+  const cls = k === n ? "fit-top" : k >= n / 2 ? "fit-in" : k > 0 ? "fit-near" : "fit-stretch";
+  return `<span class="pill ${cls}">${k} of ${n} unis in reach</span>`;
+}
+
+function renderResults(){
+  const chosen = aNames(), ps = picks(), m = myGrades(), voc = vocPicks();
+  const scored = COURSE_LIST.map(c => {
+    const r = solve(c.req, chosen);
+    const via = r.missing > 0 ? vocRoute(c) : null;
+    const vrel = voc.filter(it => it.path.routes.includes(c.name) || it.path.related.includes(c.name)).length;
+    const rel = chosen.filter(s => c.req.flat().includes(s) || c.helpful.includes(s)).length + 2 * vrel;
+    return {c, r, rel, via, ok: r.missing === 0 || !!via};
+  });
+  const open = scored.filter(x => x.ok).sort((a,b) => b.rel - a.rel || (b.c.req.length - a.c.req.length) || a.c.name.localeCompare(b.c.name));
+  const almost = scored.filter(x => !x.ok && x.r.missing === 1);
+
+  // University filter
+  state.unis = state.unis.filter(u => ALL_UNIS.includes(u));
+  const sel = state.unis;
+  renderUniPicker();
+  document.getElementById("legend").hidden = !m.on;
+  const atUni = x => !sel.length || x.c.unis.some(u => sel.includes(u.name));
+  const pool = open.filter(atUni);
+
+  const areas = ["All", ...new Set(pool.map(x => x.c.area))];
+  if (!areas.includes(state.area)) state.area = "All";
+  const counts = a => a === "All" ? pool.length : pool.filter(x => x.c.area === a).length;
+  const f = document.getElementById("filters");
+  f.innerHTML = areas.map(a => `<button type="button" class="filter" id="filter-${slug(a)}" aria-pressed="${a === state.area}" data-a="${a}">${a}<span class="c">${counts(a)}</span></button>`).join("");
+  f.querySelectorAll(".filter").forEach(b => b.onclick = () => { state.area = b.dataset.a; save(); renderResults(); });
+
+  const title = document.getElementById("summary-title"), sub = document.getElementById("summary-sub");
+  if (!ps.length){
+    title.innerHTML = `Pick a subject to start`;
+    sub.textContent = "Some courses accept any subjects. Others need specific ones.";
+  } else {
+    const offers = pool.flatMap(x => x.c.unis.filter(u => !sel.length || sel.includes(u.name)));
+    const met = offers.filter(u => m.pts >= u.pts).length;
+    const where = sel.length === 1 ? ` at ${sel[0]}` : sel.length > 1 ? ` at your ${sel.length} universities` : "";
+    title.innerHTML = `<span class="num">${pool.length}</span> courses open to you${where}`;
+    sub.textContent = `With ${ps.map(it => it.label).join(", ")}. ` + (m.on
+      ? `Your predicted ${m.str} meets ${met} of the ${offers.length} university offers listed${sel.length ? " there" : ""}.`
+      : `Open "Where to study" on any course to see the universities and their grades.`);
+  }
+
+  const shown = pool.filter(x => state.area === "All" || x.c.area === state.area);
+  const grid = document.getElementById("grid");
+  grid.innerHTML = shown.length ? shown.map(({c, via}) => {
+    const {name, area, req, helpful, unis, top, low, about, careers, extra, checked} = c;
+    const lo = pct(gradePts(low)), hi = pct(gradePts(top));
+    const k = unis.filter(u => m.pts >= u.pts).length;
+    const focus = unis.filter(u => sel.includes(u.name));
+    return `<article class="card">
+      <div class="card-top"><span class="area" style="--dot:${AREA_DOT[area]}">${area}</span>${m.on ? pill(k, unis.length) : ""}</div>
+      <h3>${name}</h3>
+      <p class="req">Needs: <b>${reqText(req)}</b>${NEEDS_NOTE[name] ? ` ${NEEDS_NOTE[name]}` : ""}</p>
+      ${via ? `<p class="via"><b>Your ${via.it.label} is accepted instead at some unis.</b> ${via.note}</p>` : ""}
+      ${focus.length ? `<div class="focus-list">${focus.map(f => { const fs = uniStatus(f, m.pts); return `<div class="focus uni ${fs[0]}"><span class="mark" title="${fs[2]}">${fs[1]}</span>${srcLink(name, f)}<span class="ug">${f.g}</span>${(f.note || (voc.length && VOC_CAUTION.has(f.name))) ? `<span class="note">${[f.note, voc.length && VOC_CAUTION.has(f.name) ? "Usually wants A-levels. Check if it accepts your " + voc[0].badge + "." : ""].filter(Boolean).join(". ")}</span>` : ""}</div>`; }).join("")}</div>` : ""}
+      <div class="offer"><span class="lab">Offers range</span><span class="g">${low}<span>to</span>${top}</span></div>
+      <div class="bar" aria-label="Offers range from ${gradePts(low)} to ${gradePts(top)} UCAS points.${m.on ? ` You have ${m.pts}.` : ""}">
+        <span class="range" style="left:${lo}%;width:${Math.max(hi - lo, 2)}%"></span>
+        ${m.on ? `<span class="you" style="left:${pct(m.pts)}%">You</span>` : ""}
+      </div>
+      <div class="bar-scale"><span>Wider range of unis</span><span>Most competitive</span></div>
+      <details class="unis-d"><summary>Where to study <span class="sc">${unis.length} unis</span></summary>
+        <ul class="unis">${unis.map(u => { const s = uniStatus(u, m.pts); return `<li class="uni ${s[0]}${sel.includes(u.name) ? " hl" : ""}"><span class="mark" title="${s[2]}">${s[1]}</span>${srcLink(name, u)}<span class="ug">${u.g}</span>${(u.note || (voc.length && VOC_CAUTION.has(u.name))) ? `<span class="note">${[u.note, voc.length && VOC_CAUTION.has(u.name) ? "Usually wants A-levels. Check if it accepts your " + voc[0].badge + "." : ""].filter(Boolean).join(". ")}</span>` : ""}</li>`; }).join("")}</ul>
+        <p class="src">${SOURCES[name] ? `Underlined unis were checked on their own course page on ${SOURCES[name].date}. Tap one to open it.` : checked ? "Standard offers for 2027 entry." : "Recent standard offers. Check the uni's website for 2027 entry."}</p>
+      </details>
+      <details><summary>What's it like?</summary><div class="more">
+        <p>${about}</p>
+        <p><span class="k">Where it leads:</span> ${careers}</p>
+        ${helpful.length ? `<p><span class="k">Useful extra subjects:</span> ${helpful.join(", ")}</p>` : ""}
+        ${extra ? `<p class="extra">${extra}</p>` : ""}
+      </div></details>
+    </article>`;
+  }).join("") : `<div class="nothing">${ps.length ? (sel.length ? `None of your matching courses are listed at ${sel.length === 1 ? sel[0] : "the universities you picked"}. Try adding another university.` : "No courses in this area match your subjects yet.") : "Your matching courses will appear here."}</div>`;
+
+  const aw = document.getElementById("almost-wrap");
+  const near = almost.filter(atUni);
+  if (ps.length && near.length){
+    aw.innerHTML = `<h2>Almost there</h2><p>You're one subject away from these. ${usedSize() >= 4 ? "You'd need to swap one of your subjects." : "Tap an A-level to try it."}</p>
+      <div class="almost">${near.map(({c, r}) => {
+        const opts = c.req[r.unmet[0]].filter(s => !chosen.includes(s));
+        return `<div class="mini"><span class="area" style="--dot:${AREA_DOT[c.area]}">${c.area}</span><h4>${c.name}</h4>
+          <div class="add">Add A-level ${opts.slice(0,4).map(s => `<button type="button" data-s="${s}">${s}</button>`).join(" or ")}</div></div>`;
+      }).join("")}</div>`;
+    aw.querySelectorAll(".add button").forEach(b => b.onclick = () => toggle("al:" + b.dataset.s));
+  } else aw.innerHTML = "";
+
+  // Unlock suggestions
+  const u = document.getElementById("unlock");
+  const all = ALEVELS.filter(s => !chosen.includes(s));
+  const gains = all.map(s => ({s, n: scored.filter(x => !x.ok && solve(x.c.req, [...chosen, s]).missing === 0).length}))
+    .filter(x => x.n > 0).sort((a,b) => b.n - a.n).slice(0,3);
+  if (usedSize() >= 4){
+    u.innerHTML = `<h3>You're full</h3><p>Curious what a different subject would unlock? Remove one and the suggestions will show here.</p>`;
+  } else if (gains.length){
+    u.innerHTML = `<h3>Unlock more courses</h3><p>${ps.length ? "Adding one of these A-levels would open up the most new courses." : "These A-levels open the most doors."}</p>
+      <div class="unlock-list">${gains.map(g => `<button type="button" class="unlock-btn" data-s="${g.s}">+ ${g.s}<span class="n">+${g.n} course${g.n > 1 ? "s" : ""}</span></button>`).join("")}</div>`;
+    u.querySelectorAll(".unlock-btn").forEach(b => b.onclick = () => toggle("al:" + b.dataset.s));
+  } else {
+    u.innerHTML = `<h3>Nice spread</h3><p>Your subjects already cover every course on our list that has specific requirements.</p>`;
+  }
+}
+
+function renderUniPicker(){
+  const sel = state.unis;
+  const btn = document.getElementById("uni-btn");
+  btn.textContent = sel.length === 0 ? "Any university" : sel.length === 1 ? "1 university" : `${sel.length} universities`;
+  document.querySelectorAll("#uni-options input").forEach(cb => { cb.checked = sel.includes(cb.value); });
+  const chips = document.getElementById("uni-chips");
+  chips.innerHTML = sel.map(u => `<button type="button" class="uchip" data-u="${u}" aria-label="Remove ${u}">${u}<span class="x">✕</span></button>`).join("");
+  chips.querySelectorAll(".uchip").forEach(b => b.onclick = () => { state.unis = state.unis.filter(x => x !== b.dataset.u); save(); renderResults(); });
+}
+function setupUniPicker(){
+  const btn = document.getElementById("uni-btn"), panel = document.getElementById("uni-panel"), search = document.getElementById("uni-search"), box = document.getElementById("uni-options");
+  const courseCount = u => COURSE_LIST.filter(c => c.unis.some(x => x.name === u)).length;
+  box.innerHTML = ALL_UNIS.map(u => `<label class="uni-opt" for="uni-opt-${slug(u)}" data-name="${u.toLowerCase()}"><span class="lbl"><input type="checkbox" id="uni-opt-${slug(u)}" value="${u}">${u}</span><span class="cn">${courseCount(u)} ${courseCount(u) === 1 ? "course" : "courses"}</span></label>`).join("");
+  box.querySelectorAll("input").forEach(cb => cb.onchange = () => {
+    state.unis = cb.checked ? [...state.unis, cb.value] : state.unis.filter(x => x !== cb.value);
+    save(); renderResults();
+  });
+  const open = v => { panel.hidden = !v; btn.setAttribute("aria-expanded", v); if (v) search.focus(); };
+  btn.onclick = () => open(panel.hidden);
+  document.getElementById("uni-done").onclick = () => { open(false); btn.focus(); };
+  document.getElementById("uni-clear").onclick = () => { state.unis = []; save(); renderResults(); };
+  search.oninput = () => { const q = search.value.trim().toLowerCase(); box.querySelectorAll(".uni-opt").forEach(l => l.hidden = q && !l.dataset.name.includes(q)); };
+  document.addEventListener("click", e => { if (!panel.hidden && !document.getElementById("uni-pick").contains(e.target)) open(false); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && !panel.hidden) { open(false); btn.focus(); } });
+}
+
+function render(){ renderPicker(); renderResults(); }
+const PALETTES = [["bold","Bold",["#FF4F79","#FFD23F","#24C79C","#5B8CFF"]],["sage","Sage",["#3E7A5C","#B9DDC4","#F1DFA6","#E9B9A6"]],["ocean","Ocean",["#2F6DB0","#BCD3F0","#BFE3D8","#F2C3C0"]],["lavender","Lavender",["#7254B5","#D9CCF0","#C2E2D2","#EDBFD0"]],["stone","Stone",["#8A5A44","#E7C4B4","#C7DECF","#C9D6E2"]]];
+function applyPalette(k){
+  const r = document.documentElement;
+  if (k === "bold") { r.removeAttribute("data-palette"); r.classList.remove("soft"); }
+  else { r.setAttribute("data-palette", k); r.classList.add("soft"); }
+  document.querySelectorAll(".pal").forEach(b => b.setAttribute("aria-pressed", b.dataset.p === k));
+}
+function setupPalette(){
+  let cur = "bold";
+  try { cur = localStorage.getItem("flopath-palette") || "bold"; } catch(e){}
+  if (!PALETTES.some(p => p[0] === cur)) cur = "bold";
+  const box = document.getElementById("palette-btns");
+  box.innerHTML = PALETTES.map(([k, label, cols]) => `<button type="button" class="pal" id="pal-${k}" data-p="${k}" aria-pressed="false"><span class="sw">${cols.map(c => `<i style="background:${c}"></i>`).join("")}</span>${label}</button>`).join("");
+  box.querySelectorAll(".pal").forEach(b => b.onclick = () => { applyPalette(b.dataset.p); try { localStorage.setItem("flopath-palette", b.dataset.p); } catch(e){} });
+  applyPalette(cur);
+}
+setupPalette();
+setupUniPicker();
+render();
+</script>
+
+</body>
+</html>
