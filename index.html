@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: chunky sticker-style picker on the left (sticky on desktop), course results on the right; stacks on phones. */
+/* Layout: three click-through steps (subjects, grades, courses) in one centred column, with a sticky step bar at the bottom. */
 :root{
   --bg:#EAF0F8; --surface:#FFFFFF; --surface-2:#F4F7FC; --ink:#131A35; --muted:#58617F; --line:#131A35; --shadow:#131A35;
   --accent:#FF4F79; --num:#E8365F; --sun:#FFD23F; --mint:#24C79C; --sky:#5B8CFF; --lilac:#B591FF; --on-pop:#131A35;
@@ -44,14 +44,17 @@
 :root.soft .uni-panel{box-shadow:0 14px 34px var(--shadow)}
 :root.soft .chip,:root.soft .filter,:root.soft .tab,:root.soft .pick,:root.soft .uchip,:root.soft .pill,:root.soft .uni-btn,:root.soft .unlock-btn,:root.soft .grade-row select,:root.soft .bar,:root.soft .mini,:root.soft .focus,:root.soft .via,:root.soft .unlock,:root.soft .uni .mark,:root.soft summary::before,:root.soft .uni-foot button,:root.soft .mini .add button{border-width:1.5px}
 :root.soft .chip:hover{box-shadow:0 2px 8px var(--shadow)}
+:root.soft .rows,:root.soft .cats,:root.soft .stepbar,:root.soft .subj-search,:root.soft .btn,:root.soft .cat-btn .pm,:root.soft .cat-btn .cc.on{border-width:1.5px}
+:root.soft .rows{box-shadow:0 10px 30px var(--shadow)}
+:root.soft .btn{box-shadow:0 2px 8px var(--shadow)}
 :root.soft .chip[aria-pressed="true"],:root.soft .uni-btn{box-shadow:0 2px 8px var(--shadow)}
 :root.soft .bar .range{background:var(--sky)}
 :root.soft h1 .hl{background:linear-gradient(transparent 62%, var(--accent) 62%, var(--accent) 90%, transparent 90%)}
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{display:inline-flex;align-items:center;gap:.25em;font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,6vw,3.4rem);letter-spacing:-.03em;color:var(--ink);line-height:1}
+.brand{display:inline-flex;align-items:center;gap:.25em;font-family:var(--display);font-weight:800;font-size:clamp(2rem,5vw,2.8rem);letter-spacing:-.03em;color:var(--ink);line-height:1}
 .brand-mark{display:inline-grid;place-items:center;color:var(--num)}
 .brand-mark svg{width:1.05em;height:1.05em}
-.topbar{margin-bottom:22px}
+.topbar{margin-bottom:16px}
 .brand-flo{color:var(--num)}
 .palette{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700;color:var(--muted)}
 #palette-btns{display:flex;gap:8px;flex-wrap:wrap}
@@ -68,17 +71,79 @@ button,select{font:inherit;color:inherit}
 a{color:inherit}
 
 /* Hero */
-.hero{padding-block:40px 28px}
+.hero{padding-block:22px 6px}
 .eyebrow{display:inline-block;font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;background:var(--sun);color:var(--on-pop);padding:4px 10px;border:2px solid var(--line);border-radius:999px;transform:rotate(-2deg)}
-h1{font-family:var(--display);font-weight:800;font-size:clamp(1.9rem,4.6vw,3.4rem);line-height:1;letter-spacing:-.02em;margin:18px 0 14px;text-wrap:balance;max-width:16ch}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.8rem,4.2vw,2.8rem);line-height:1;letter-spacing:-.02em;margin:18px 0 14px;text-wrap:balance;max-width:16ch}
 h1 .hl{background:linear-gradient(transparent 58%, var(--accent) 58%, var(--accent) 92%, transparent 92%);padding:0 .05em}
 .lede{font-size:1.1rem;color:var(--muted);max-width:none;margin:0}
 
-/* Main layout */
-.layout{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:28px;align-items:start;padding-block:0 56px}
-@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
-.panel{background:var(--surface);border:2.5px solid var(--line);border-radius:18px;box-shadow:6px 6px 0 var(--shadow);padding:20px;display:flex;flex-direction:column;gap:22px;position:sticky;top:calc(env(safe-area-inset-top, 0px) + 16px);max-height:calc(100vh - 32px);overflow:auto}
-@media (max-width:900px){.panel{position:static;max-height:none}}
+/* Steps: one job per screen, with a sticky bar for moving between them */
+.steps{display:flex;gap:8px}
+.step-link{flex:1;display:flex;align-items:center;gap:0;border:0;border-top:4px solid color-mix(in srgb, var(--line) 22%, transparent);background:transparent;padding:8px 0 0;font-weight:700;font-size:14px;color:var(--muted);cursor:pointer;text-align:left;min-width:0}
+.step-link .step-num{width:22px;height:22px;font-size:12px;background:var(--surface-2);color:var(--muted);border:2px solid color-mix(in srgb, var(--line) 40%, transparent)}
+.step-link.done{border-top-color:var(--num);color:var(--ink)}
+.step-link.done .step-num{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.step-link[aria-current="step"]{border-top-color:var(--num);color:var(--ink)}
+.step-link[aria-current="step"] .step-num{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.step-link:disabled{cursor:default;opacity:.55}
+.stage{max-width:860px;padding-block:22px 120px}
+.step{display:flex;flex-direction:column;gap:16px;min-width:0}
+.step h1{margin:0}
+.step .lede{font-size:1.02rem}
+.step-title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.step-title h2,.tray-head h2{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,3.4vw,2rem);margin:0;letter-spacing:-.015em}
+.tray-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:4px}
+.tray-head h2{font-size:1.25rem}
+.subj-search,#uni-search{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;background:var(--surface);color:var(--ink)}
+.cats{background:var(--surface);border:2.5px solid var(--line);border-radius:16px;overflow:hidden}
+.cat + .cat{border-top:2px dashed color-mix(in srgb, var(--line) 30%, transparent)}
+.cat-btn{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:14px 16px;font-weight:700;font-size:15px;text-align:left;cursor:pointer}
+.cat-btn:hover{background:var(--surface-2)}
+.cat-btn .pm{font-family:var(--mono);display:inline-grid;place-items:center;width:22px;height:22px;border:2px solid var(--line);border-radius:6px;font-size:13px;flex:none}
+.cat-btn .cc{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+.cat-btn .cc.on{background:var(--sun);color:var(--on-pop);border:2px solid var(--line);border-radius:999px;padding:1px 8px;font-weight:700}
+.cat-body{padding:2px 16px 16px}
+.no-match{padding:18px 16px;color:var(--muted);margin:0}
+.chip .cb{font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-left:6px}
+.chip[aria-pressed="true"] .cb{color:var(--on-pop)}
+
+.stepbar{position:fixed;left:0;right:0;bottom:0;z-index:15;background:color-mix(in srgb, var(--bg) 92%, transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:2.5px solid var(--line);padding-bottom:env(safe-area-inset-bottom, 0px)}
+.stepbar-in{max-width:860px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+.sb-note{font-size:13px;color:var(--muted);font-weight:600}
+.btn{border:2.5px solid var(--line);background:var(--ink);color:var(--surface);border-radius:999px;padding:10px 20px;font-weight:700;cursor:pointer;box-shadow:3px 3px 0 var(--shadow);white-space:nowrap}
+.btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+.btn.soft{background:var(--surface);color:var(--ink)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:transparent;box-shadow:none;padding-inline:4px}
+
+.rows{display:flex;flex-direction:column;background:var(--surface);border:2.5px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:5px 5px 0 var(--shadow)}
+.crow{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:6px 12px;width:100%;border:0;background:transparent;padding:13px 14px;text-align:left;cursor:pointer}
+.crow + .crow{border-top:2px dashed color-mix(in srgb, var(--line) 30%, transparent)}
+.crow:hover{background:var(--surface-2)}
+.crow .area-dot{width:10px;height:10px;border-radius:3px;background:var(--dot,var(--muted));border:1.5px solid var(--line)}
+.crow .cn{display:flex;flex-direction:column;min-width:0}
+.crow .cn b{font-family:var(--display);font-weight:800;font-size:1.05rem;line-height:1.2;letter-spacing:-.01em}
+.crow .cn small{font-size:13px;color:var(--muted)}
+.crow .cn .g{font-family:var(--mono);font-weight:700;color:var(--ink)}
+.crow .sc{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.crow .chev{font-size:20px;color:var(--muted);line-height:1}
+@media (max-width:480px){.crow{grid-template-columns:auto minmax(0,1fr) auto}.crow .pill,.crow .sc{grid-column:2;grid-row:2;justify-self:start}.crow .chev{grid-row:1 / span 2;grid-column:3}}
+.back{border:0;background:none;padding:0;font-weight:700;font-size:15px;cursor:pointer;color:var(--ink);align-self:flex-start}
+.detail{display:flex;flex-direction:column;gap:12px;min-width:0}
+.detail h2{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,4vw,2.2rem);line-height:1.05;margin:0;letter-spacing:-.015em}
+.detail h3{font-family:var(--display);font-weight:800;font-size:1.15rem;margin:10px 0 0}
+.detail .unis{margin:0}
+.unlock .unlock-list{flex-direction:row;flex-wrap:wrap}
+.unlock .unlock-btn{width:auto}
+details.notes,details.fold{margin-top:0}
+details.notes summary,details.fold summary{font-size:15px}
+.notes ul{margin-top:10px}
+@media (min-width:700px){.filters{flex-wrap:wrap;overflow:visible;margin-inline:0;padding-inline:0}}
+@media (max-width:600px){.topbar{flex-wrap:nowrap}.brand{font-size:1.75rem}.pal .sw i{width:5px;height:16px}.palette>span,.pal .pl{display:none}.pal{padding:4px}#palette-btns{gap:5px;flex-wrap:nowrap}.palette{flex-wrap:nowrap}}
+#results-list,#course-view{display:flex;flex-direction:column;gap:16px;min-width:0}
+.detail.card:hover{transform:none;box-shadow:none}
+.detail .sc{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:500}
+.fold .almost{margin-top:10px}
+.fold > p{margin:8px 0 0;color:var(--muted);font-size:14px}
 .step-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
 .step-head h2{font-family:var(--display);font-weight:800;font-size:1.25rem;margin:0;letter-spacing:-.01em}
 .step-num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--surface);font-size:14px;font-weight:700;margin-right:8px;vertical-align:2px}
@@ -115,12 +180,13 @@ h1 .hl{background:linear-gradient(transparent 58%, var(--accent) 58%, var(--acce
 .summary h2{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.4rem);margin:0;line-height:1.05;letter-spacing:-.015em;text-wrap:balance}
 .summary h2 .num{color:var(--num)}
 .summary p{margin:4px 0 0;color:var(--muted)}
-.filters{display:flex;flex-wrap:wrap;gap:6px}
+.filters{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-inline:-16px;padding:2px 16px 4px}
+.filters::-webkit-scrollbar{display:none}
+.filter{flex:none}
 .filter{border:2px solid var(--line);background:transparent;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer}
 .filter[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
 .filter .c{font-family:var(--mono);opacity:.7;margin-left:4px}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;align-items:start}
 .card{background:var(--surface);border:2.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;transition:transform .15s, box-shadow .15s}
 .card:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 var(--shadow)}
 .card-top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
@@ -239,66 +305,70 @@ a.un{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-
     <div class="brand" aria-label="FloPath"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="40" height="40"><path d="M4 22c6 0 6-12 12-12s6 12 12 12" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"/><circle cx="4" cy="22" r="3" fill="currentColor"/><circle cx="28" cy="22" r="3" fill="currentColor"/></svg></span><span class="brand-name"><span class="brand-flo">Flo</span>Path</span></div>
     <div class="palette" role="group" aria-label="Colour scheme"><span>Colours</span><div id="palette-btns"></div></div>
   </div>
-  <h1>Pick your subjects. See <span class="hl">where they lead.</span></h1>
-  <p class="lede">Choose what you're studying after GCSEs: A-levels, BTECs, Cambridge Technicals, T Levels, or a mix. Add your predicted grades if you know them. We'll show the UK degree courses your choices open up, which universities run them, the grades each one asks for, and which subject would unlock even more.</p>
+  <nav class="steps" aria-label="Steps">
+    <button type="button" class="step-link" id="step-link-1" data-step="1"><span class="step-num">1</span>Subjects</button>
+    <button type="button" class="step-link" id="step-link-2" data-step="2"><span class="step-num">2</span>Grades</button>
+    <button type="button" class="step-link" id="step-link-3" data-step="3"><span class="step-num">3</span>Courses</button>
+  </nav>
 </header>
 
-<main class="wrap layout">
-  <aside class="panel" aria-label="Your subjects and grades">
-    <section>
-      <div class="step-head"><h2><span class="step-num">1</span>Your subjects</h2><span class="count" id="count" title="A-levels' worth picked">0/4</span></div>
-      <div id="your-picks"></div>
-      <div class="tabs" id="qual-tabs" role="tablist" aria-label="Qualification type"></div>
-      <div id="subject-groups"></div>
-      <p class="hint">Pick up to 4 A-levels' worth. Mixing is fine, like 2 A-levels and a BTEC Extended Certificate. A BTEC Extended Diploma or a T Level counts as 3.</p>
-    </section>
-    <section>
-      <div class="step-head"><h2><span class="step-num">2</span>Predicted grades</h2><span class="opt">Optional</span></div>
-      <div class="grades" id="grades"></div>
-      <div class="points" id="points"></div>
-    </section>
-    <section class="unlock" id="unlock"></section>
-  </aside>
+<main class="wrap stage">
+  <section class="step" id="step-1" aria-labelledby="step-1-title">
+    <h1 id="step-1-title">Pick your subjects. See <span class="hl">where they lead.</span></h1>
+    <p class="lede">Choose what you're studying after GCSEs. We'll show the UK degree courses it opens up, where you can study them and the grades they ask for.</p>
+    <div class="tray-head"><h2>Your subjects</h2><span class="count" id="count" title="A-levels' worth picked">0/4</span></div>
+    <div id="your-picks"></div>
+    <div class="tabs" id="qual-tabs" role="tablist" aria-label="Qualification type"></div>
+    <input type="search" class="subj-search" id="subj-search" placeholder="Search subjects" autocomplete="off" aria-label="Search subjects">
+    <div id="subject-groups"></div>
+    <p class="hint">Pick up to 4 A-levels' worth. Mixing is fine, like 2 A-levels and a BTEC Extended Certificate. A BTEC Extended Diploma or a T Level counts as 3.</p>
+  </section>
 
-  <section class="results" aria-live="polite">
-    <div class="summary">
-      <div>
+  <section class="step" id="step-2" aria-labelledby="step-2-title" hidden>
+    <div class="step-title"><h2 id="step-2-title">Predicted grades</h2><span class="opt">Optional</span></div>
+    <p class="lede">Add them to see which universities your grades reach. You can skip this and come back later.</p>
+    <div class="grades" id="grades"></div>
+    <div class="points" id="points"></div>
+  </section>
+
+  <section class="step results" id="step-3" aria-labelledby="summary-title" hidden>
+    <div id="results-list">
+      <div class="summary">
         <h2 id="summary-title"></h2>
         <p id="summary-sub"></p>
       </div>
-    </div>
-    <div class="toolbar">
-      <div class="uni-pick" id="uni-pick">
-        <span class="uni-label">Show courses at</span>
-        <button type="button" class="uni-btn" id="uni-btn" aria-expanded="false" aria-controls="uni-panel">Any university</button>
-        <div class="uni-panel" id="uni-panel" hidden>
-          <input type="search" id="uni-search" placeholder="Search universities" autocomplete="off" aria-label="Search universities">
-          <div class="uni-options" id="uni-options" role="group" aria-label="Universities"></div>
-          <div class="uni-foot"><button type="button" id="uni-clear">Clear all</button><button type="button" id="uni-done" class="done">Done</button></div>
+      <div class="unlock" id="unlock"></div>
+      <div class="toolbar">
+        <div class="uni-pick" id="uni-pick">
+          <span class="uni-label">Show courses at</span>
+          <button type="button" class="uni-btn" id="uni-btn" aria-expanded="false" aria-controls="uni-panel">Any university</button>
+          <div class="uni-panel" id="uni-panel" hidden>
+            <input type="search" id="uni-search" placeholder="Search universities" autocomplete="off" aria-label="Search universities">
+            <div class="uni-options" id="uni-options" role="group" aria-label="Universities"></div>
+            <div class="uni-foot"><button type="button" id="uni-clear">Clear all</button><button type="button" id="uni-done" class="done">Done</button></div>
+          </div>
+          <div class="uni-chips" id="uni-chips"></div>
         </div>
-        <div class="uni-chips" id="uni-chips"></div>
       </div>
-      <div class="legend" id="legend">
-        <span class="uni meet"><span class="mark">✓</span>Your grades meet it</span>
-        <span class="uni close"><span class="mark">~</span>One grade off</span>
-        <span class="uni reach"><span class="mark">↑</span>Needs higher grades</span>
-      </div>
+      <div class="filters" id="filters" role="group" aria-label="Filter by subject area"></div>
+      <div id="grid" aria-live="polite"></div>
+      <div class="almost-wrap" id="almost-wrap"></div>
+      <details class="notes">
+        <summary>Before you decide</summary>
+        <ul>
+          <li>Each uni's grades are its standard A-level offer. Medicine offers are for 2027 entry. Psychology, Law, Computer Science, Nursing, Economics, Business, Pharmacology, Diagnostic Radiography, Occupational Therapy, Cyber Security and Marketing were checked on each uni's own course page in October 2026, and you can tap a uni to open its page. The others are recent offers, and unis change them most years, so always check the course page before you apply.</li><li>The lists show a spread of universities for each course, not every one. UCAS lists them all.</li>
+          <li>Lots of unis make lower "contextual" offers, and many courses have a foundation year if your grades come in lower.</li>
+          <li>GCSEs count too. Most courses want at least grade 4 or 5 in English and Maths.</li>
+          <li>BTECs, Cambridge Technicals and T Levels are accepted for lots of courses, especially where no particular subject is required. Courses that need a specific science or Maths usually want the A-level, and some highly selective unis rarely take vocational qualifications on their own. Grades for these are compared using UCAS points.</li>
+          <li>Search real courses on <a href="https://digital.ucas.com/coursesearch/" target="_blank" rel="noopener">UCAS</a> and check subject advice at <a href="https://www.informedchoices.ac.uk/" target="_blank" rel="noopener">Informed Choices</a>.</li>
+        </ul>
+      </details>
     </div>
-    <div class="filters" id="filters" role="group" aria-label="Filter by subject area"></div>
-    <div class="grid" id="grid"></div>
-    <div class="almost-wrap" id="almost-wrap"></div>
-    <aside class="notes">
-      <h3>Before you decide</h3>
-      <ul>
-        <li>Each uni's grades are its standard A-level offer. Medicine offers are for 2027 entry. Psychology, Law, Computer Science, Nursing, Economics, Business, Pharmacology, Diagnostic Radiography, Occupational Therapy, Cyber Security and Marketing were checked on each uni's own course page in October 2026, and you can tap a uni to open its page. The others are recent offers, and unis change them most years, so always check the course page before you apply.</li><li>The lists show a spread of universities for each course, not every one. UCAS lists them all.</li>
-        <li>Lots of unis make lower "contextual" offers, and many courses have a foundation year if your grades come in lower.</li>
-        <li>GCSEs count too. Most courses want at least grade 4 or 5 in English and Maths.</li>
-        <li>BTECs, Cambridge Technicals and T Levels are accepted for lots of courses, especially where no particular subject is required. Courses that need a specific science or Maths usually want the A-level, and some highly selective unis rarely take vocational qualifications on their own. Grades for these are compared using UCAS points.</li>
-        <li>Search real courses on <a href="https://digital.ucas.com/coursesearch/" target="_blank" rel="noopener">UCAS</a> and check subject advice at <a href="https://www.informedchoices.ac.uk/" target="_blank" rel="noopener">Informed Choices</a>.</li>
-      </ul>
-    </aside>
+    <div id="course-view" hidden></div>
   </section>
 </main>
+
+<div class="stepbar" id="stepbar"><div class="wrap stepbar-in" id="stepbar-in"></div></div>
 <div class="toast" id="toast" role="status"></div>
 
 <script>
@@ -527,7 +597,7 @@ try {
   });
 } catch(e){}
 
-let state = {chosen:["al:Biology","al:Chemistry","al:Physics"], grades:{"al:Biology":"A","al:Chemistry":"A","al:Physics":"B"}, sizes:{}, tab:"al", area:"All", unis:[]};
+let state = {chosen:["al:Biology","al:Chemistry","al:Physics"], grades:{"al:Biology":"A","al:Chemistry":"A","al:Physics":"B"}, sizes:{}, tab:"al", area:"All", unis:[], step:1};
 try {
   const saved = JSON.parse(localStorage.getItem("flopath") || "null");
   if (saved && Array.isArray(saved.chosen)) {
@@ -536,6 +606,7 @@ try {
     const grades = {};
     Object.entries(saved.grades || {}).forEach(([k, v]) => grades[fix(k)] = v);
     state = {...state, ...saved, chosen: saved.chosen.map(fix).filter(id => CATALOG[id]), grades, sizes: saved.sizes || {}};
+    if (!saved.step) state.step = 3; // Returning visitors from before the steps go straight to their courses
     if (saved.uni && !Array.isArray(saved.unis)) state.unis = [saved.uni];
     delete state.uni;
     if (!Array.isArray(state.unis)) state.unis = [];
@@ -543,6 +614,8 @@ try {
   }
 } catch(e){}
 const save = () => { try { localStorage.setItem("flopath", JSON.stringify(state)); } catch(e){} };
+// Screen-only state that isn't saved: open category, subject search, open course
+const ui = {cat:null, q:"", course:null, almostOpen:false};
 
 const picks = () => state.chosen.map(id => CATALOG[id]).filter(Boolean);
 const aNames = () => picks().filter(it => it.type === "al").map(it => it.name);
@@ -620,23 +693,37 @@ function renderPicker(){
     const n = ps.filter(it => it.type === t).length;
     return `<button type="button" role="tab" class="tab" id="tab-${t}" aria-selected="${t === state.tab}" data-t="${t}">${label}${n ? `<span class="tn">${n}</span>` : ""}</button>`;
   }).join("");
-  tabs.querySelectorAll(".tab").forEach(b => b.onclick = () => { state.tab = b.dataset.t; save(); renderPicker(); });
+  tabs.querySelectorAll(".tab").forEach(b => b.onclick = () => { state.tab = b.dataset.t; ui.cat = null; ui.q = ""; document.getElementById("subj-search").value = ""; save(); renderPicker(); });
 
+  // Subjects sit in folded categories. Searching looks across every qualification type.
   const box = document.getElementById("subject-groups");
-  const chip = it => {
+  const q = ui.q.trim().toLowerCase();
+  const chip = (it, badge) => {
     const on = state.chosen.includes(it.id);
-    return `<button type="button" class="chip" id="chip-${slug(it.id)}" aria-pressed="${on}" data-id="${it.id}">${it.name}</button>`;
+    return `<button type="button" class="chip" id="chip-${slug(it.id)}" aria-pressed="${on}" data-id="${it.id}">${it.name}${badge && it.type !== "al" ? `<span class="cb">${it.badge}</span>` : ""}</button>`;
   };
-  const items = Object.values(CATALOG).filter(it => it.type === state.tab);
-  const blurb = state.tab === "al" ? "" : `<p class="tab-blurb">${VOC[state.tab].blurb}</p>`;
-  box.innerHTML = blurb + byCat(items).map(([cat, list]) => `<div class="group-label">${cat}</div><div class="chips">${list.map(chip).join("")}</div>`).join("");
+  if (q){
+    const hits = Object.values(CATALOG).filter(it => it.name.toLowerCase().includes(q) || it.label.toLowerCase().includes(q));
+    box.innerHTML = `<div class="cats">${hits.length ? `<div class="cat-body" style="padding-top:16px"><div class="chips">${hits.map(it => chip(it, true)).join("")}</div></div>` : `<p class="no-match">No subject matches "${q.replace(/</g, "&lt;")}". Try a shorter word, or open a category.</p>`}</div>`;
+  } else {
+    const items = Object.values(CATALOG).filter(it => it.type === state.tab);
+    const groups = byCat(items);
+    const blurb = state.tab === "al" ? "" : `<p class="tab-blurb">${VOC[state.tab].blurb}</p>`;
+    box.innerHTML = blurb + `<div class="cats">${groups.map(([cat, list]) => {
+      const isOpen = groups.length === 1 || ui.cat === state.tab + ":" + cat;
+      const n = list.filter(it => state.chosen.includes(it.id)).length;
+      const cid = slug(state.tab + "-" + cat);
+      return `<div class="cat"><button type="button" class="cat-btn" id="cat-${cid}" data-cat="${cat}" aria-expanded="${isOpen}" aria-controls="catb-${cid}"><span class="pm" aria-hidden="true">${isOpen ? "–" : "+"}</span>${cat}<span class="cc${n ? " on" : ""}">${n ? n + " picked" : list.length}</span></button>${isOpen ? `<div class="cat-body" id="catb-${cid}"><div class="chips">${list.map(it => chip(it)).join("")}</div></div>` : ""}</div>`;
+    }).join("")}</div>`;
+    box.querySelectorAll(".cat-btn").forEach(b => b.onclick = () => { const k = state.tab + ":" + b.dataset.cat; ui.cat = ui.cat === k ? null : k; renderPicker(); });
+  }
   box.querySelectorAll(".chip").forEach(b => b.onclick = () => toggle(b.dataset.id));
 
   const used = usedSize();
   document.getElementById("count").textContent = used + "/4";
   const yp = document.getElementById("your-picks");
   const pickBtn = it => `<button type="button" class="pick" data-id="${it.id}" aria-label="Remove ${it.label}"><span class="badge">${it.badge}</span>${it.name}<span class="x">✕</span></button>`;
-  yp.innerHTML = ps.length ? `<div class="picks-box"><div class="picks-head">Your picks</div>${byCat(ps).map(([cat, list]) => `<div class="pick-cat">${cat}</div><div class="chips">${list.map(pickBtn).join("")}</div>`).join("")}</div>` : "";
+  yp.innerHTML = ps.length ? `<div class="chips">${ps.map(pickBtn).join("")}</div>` : `<p class="empty-grades">Nothing picked yet. Open a category below or search.</p>`;
   yp.querySelectorAll(".pick").forEach(b => b.onclick = () => toggle(b.dataset.id));
 
   const g = document.getElementById("grades");
@@ -645,7 +732,7 @@ function renderPicker(){
     const sizeSel = isVoc ? `<select id="size-${sid}" data-id="${it.id}" class="size-sel" aria-label="Size of ${it.label}">${[1,2,3].map(n => `<option value="${n}"${n === sizeOf(it) ? " selected" : ""}>${SIZE_NAMES[n]}</option>`).join("")}</select>` : "";
     const gradeSel = `<select id="grade-${sid}" data-id="${it.id}" class="grade-sel" aria-label="Predicted grade for ${it.label}"><option value=""${state.grades[it.id] ? "" : " selected"}>Not sure yet</option>${gradeOpts(it).map(([x]) => `<option${x === state.grades[it.id] ? " selected" : ""}>${x}</option>`).join("")}</select>`;
     return `<div class="grade-row"><div class="gr-name"><span class="badge">${it.badge}</span>${it.name}${sizeOf(it) === 0 ? `<span class="gr-extra">Extra, not counted in your main grades</span>` : ""}</div><div class="sels">${sizeSel}${gradeSel}</div></div>`;
-  }).join("") : `<p class="empty-grades">Pick a subject above to add your grades.</p>`;
+  }).join("") : `<p class="empty-grades">Pick a subject in step 1 to add your grades.</p>`;
   g.querySelectorAll(".grade-sel").forEach(sel => sel.onchange = () => { if (sel.value) state.grades[sel.dataset.id] = sel.value; else delete state.grades[sel.dataset.id]; save(); render(); });
   g.querySelectorAll(".size-sel").forEach(sel => sel.onchange = () => {
     const id = sel.dataset.id, n = +sel.value;
@@ -694,7 +781,6 @@ function renderResults(){
   state.unis = state.unis.filter(u => ALL_UNIS.includes(u));
   const sel = state.unis;
   renderUniPicker();
-  document.getElementById("legend").hidden = !m.on;
   const atUni = x => !sel.length || x.c.unis.some(u => sel.includes(u.name));
   const pool = open.filter(atUni);
 
@@ -716,67 +802,89 @@ function renderResults(){
     title.innerHTML = `<span class="num">${pool.length}</span> courses open to you${where}`;
     sub.textContent = `With ${ps.map(it => it.label).join(", ")}. ` + (m.on
       ? `Your predicted ${m.str} meets ${met} of the ${offers.length} university offers listed${sel.length ? " there" : ""}.`
-      : `Open "Where to study" on any course to see the universities and their grades.`);
+      : `Tap a course to see where you can study it and the grades each uni asks for.`);
   }
 
   const shown = pool.filter(x => state.area === "All" || x.c.area === state.area);
   const grid = document.getElementById("grid");
-  grid.innerHTML = shown.length ? shown.map(({c, via}) => {
-    const {name, area, req, helpful, unis, top, low, about, careers, extra, checked} = c;
-    const lo = pct(gradePts(low)), hi = pct(gradePts(top));
-    const k = unis.filter(u => m.pts >= u.pts).length;
-    const focus = unis.filter(u => sel.includes(u.name));
-    return `<article class="card">
-      <div class="card-top"><span class="area" style="--dot:${AREA_DOT[area]}">${area}</span>${m.on ? pill(k, unis.length) : ""}</div>
-      <h3>${name}</h3>
-      <p class="req">Needs: <b>${reqText(req)}</b>${NEEDS_NOTE[name] ? ` ${NEEDS_NOTE[name]}` : ""}</p>
-      ${via ? `<p class="via"><b>Your ${via.it.label} is accepted instead at some unis.</b> ${via.note}</p>` : ""}
-      ${focus.length ? `<div class="focus-list">${focus.map(f => { const fs = uniStatus(f, m.pts); return `<div class="focus uni ${fs[0]}"><span class="mark" title="${fs[2]}">${fs[1]}</span>${srcLink(name, f)}<span class="ug">${f.g}</span>${(f.note || (voc.length && VOC_CAUTION.has(f.name))) ? `<span class="note">${[f.note, voc.length && VOC_CAUTION.has(f.name) ? "Usually wants A-levels. Check if it accepts your " + voc[0].badge + "." : ""].filter(Boolean).join(". ")}</span>` : ""}</div>`; }).join("")}</div>` : ""}
-      <div class="offer"><span class="lab">Offers range</span><span class="g">${low}<span>to</span>${top}</span></div>
-      <div class="bar" aria-label="Offers range from ${gradePts(low)} to ${gradePts(top)} UCAS points.${m.on ? ` You have ${m.pts}.` : ""}">
-        <span class="range" style="left:${lo}%;width:${Math.max(hi - lo, 2)}%"></span>
-        ${m.on ? `<span class="you" style="left:${pct(m.pts)}%">You</span>` : ""}
-      </div>
-      <div class="bar-scale"><span>Wider range of unis</span><span>Most competitive</span></div>
-      <details class="unis-d"><summary>Where to study <span class="sc">${unis.length} unis</span></summary>
-        <ul class="unis">${unis.map(u => { const s = uniStatus(u, m.pts); return `<li class="uni ${s[0]}${sel.includes(u.name) ? " hl" : ""}"><span class="mark" title="${s[2]}">${s[1]}</span>${srcLink(name, u)}<span class="ug">${u.g}</span>${(u.note || (voc.length && VOC_CAUTION.has(u.name))) ? `<span class="note">${[u.note, voc.length && VOC_CAUTION.has(u.name) ? "Usually wants A-levels. Check if it accepts your " + voc[0].badge + "." : ""].filter(Boolean).join(". ")}</span>` : ""}</li>`; }).join("")}</ul>
-        <p class="src">${SOURCES[name] ? `Underlined unis were checked on their own course page on ${SOURCES[name].date}. Tap one to open it.` : checked ? "Standard offers for 2027 entry." : "Recent standard offers. Check the uni's website for 2027 entry."}</p>
-      </details>
-      <details><summary>What's it like?</summary><div class="more">
-        <p>${about}</p>
-        <p><span class="k">Where it leads:</span> ${careers}</p>
-        ${helpful.length ? `<p><span class="k">Useful extra subjects:</span> ${helpful.join(", ")}</p>` : ""}
-        ${extra ? `<p class="extra">${extra}</p>` : ""}
-      </div></details>
-    </article>`;
-  }).join("") : `<div class="nothing">${ps.length ? (sel.length ? `None of your matching courses are listed at ${sel.length === 1 ? sel[0] : "the universities you picked"}. Try adding another university.` : "No courses in this area match your subjects yet.") : "Your matching courses will appear here."}</div>`;
+  grid.innerHTML = shown.length ? `<div class="rows">${shown.map(({c, via}) => {
+    const k = c.unis.filter(u => m.pts >= u.pts).length;
+    const focus = c.unis.filter(u => sel.includes(u.name)).length;
+    const extra = [via ? `via your ${via.it.badge}` : "", focus && sel.length > 1 ? `${focus} of your unis` : ""].filter(Boolean).join(" · ");
+    return `<button type="button" class="crow" id="course-${slug(c.name)}" data-i="${COURSE_LIST.indexOf(c)}"><span class="area-dot" style="--dot:${AREA_DOT[c.area]}" aria-hidden="true"></span><span class="cn"><b>${c.name}</b><small>${c.area} · <span class="g">${c.low}</span> to <span class="g">${c.top}</span>${extra ? ` · ${extra}` : ""}</small></span>${m.on ? pill(k, c.unis.length) : `<span class="sc">${c.unis.length} unis</span>`}<span class="chev" aria-hidden="true">›</span></button>`;
+  }).join("")}</div>` : `<div class="nothing">${ps.length ? (sel.length ? `None of your matching courses are listed at ${sel.length === 1 ? sel[0] : "the universities you picked"}. Try adding another university.` : "No courses in this area match your subjects yet.") : "Pick a subject in step 1 to see your courses."}</div>`;
+  grid.querySelectorAll(".crow").forEach(b => b.onclick = () => go(3, +b.dataset.i));
 
   const aw = document.getElementById("almost-wrap");
   const near = almost.filter(atUni);
   if (ps.length && near.length){
-    aw.innerHTML = `<h2>Almost there</h2><p>You're one subject away from these. ${usedSize() >= 4 ? "You'd need to swap one of your subjects." : "Tap an A-level to try it."}</p>
+    aw.innerHTML = `<details class="fold"${ui.almostOpen ? " open" : ""}><summary>Almost there: ${near.length} more course${near.length > 1 ? "s" : ""} one subject away</summary>
+      <p>${usedSize() >= 4 ? "You'd need to swap one of your subjects." : "Tap an A-level to try it."}</p>
       <div class="almost">${near.map(({c, r}) => {
         const opts = c.req[r.unmet[0]].filter(s => !chosen.includes(s));
         return `<div class="mini"><span class="area" style="--dot:${AREA_DOT[c.area]}">${c.area}</span><h4>${c.name}</h4>
           <div class="add">Add A-level ${opts.slice(0,4).map(s => `<button type="button" data-s="${s}">${s}</button>`).join(" or ")}</div></div>`;
-      }).join("")}</div>`;
+      }).join("")}</div></details>`;
+    aw.querySelector("details").ontoggle = e => { ui.almostOpen = e.target.open; };
     aw.querySelectorAll(".add button").forEach(b => b.onclick = () => toggle("al:" + b.dataset.s));
   } else aw.innerHTML = "";
+
+  renderDetail();
 
   // Unlock suggestions
   const u = document.getElementById("unlock");
   const all = ALEVELS.filter(s => !chosen.includes(s));
   const gains = all.map(s => ({s, n: scored.filter(x => !x.ok && solve(x.c.req, [...chosen, s]).missing === 0).length}))
     .filter(x => x.n > 0).sort((a,b) => b.n - a.n).slice(0,3);
-  if (usedSize() >= 4){
-    u.innerHTML = `<h3>You're full</h3><p>Curious what a different subject would unlock? Remove one and the suggestions will show here.</p>`;
-  } else if (gains.length){
-    u.innerHTML = `<h3>Unlock more courses</h3><p>${ps.length ? "Adding one of these A-levels would open up the most new courses." : "These A-levels open the most doors."}</p>
+  u.hidden = !(ps.length && usedSize() < 4 && gains.length);
+  if (!u.hidden){
+    u.innerHTML = `<h3>Unlock more courses</h3><p>Adding one of these A-levels would open up the most new courses.</p>
       <div class="unlock-list">${gains.map(g => `<button type="button" class="unlock-btn" data-s="${g.s}">+ ${g.s}<span class="n">+${g.n} course${g.n > 1 ? "s" : ""}</span></button>`).join("")}</div>`;
     u.querySelectorAll(".unlock-btn").forEach(b => b.onclick = () => toggle("al:" + b.dataset.s));
-  } else {
-    u.innerHTML = `<h3>Nice spread</h3><p>Your subjects already cover every course on our list that has specific requirements.</p>`;
   }
+}
+
+// One course, opened from the list
+function renderDetail(){
+  const v = document.getElementById("course-view");
+  const c = ui.course == null ? null : COURSE_LIST[ui.course];
+  document.getElementById("results-list").hidden = !!c;
+  v.hidden = !c;
+  if (!c){ v.innerHTML = ""; return; }
+  const m = myGrades(), voc = vocPicks(), sel = state.unis;
+  const {name, area, req, helpful, unis, top, low, about, careers, extra, checked} = c;
+  const via = solve(req, aNames()).missing > 0 ? vocRoute(c) : null;
+  const lo = pct(gradePts(low)), hi = pct(gradePts(top));
+  const k = unis.filter(u => m.pts >= u.pts).length;
+  const focus = unis.filter(u => sel.includes(u.name));
+  const caution = u => voc.length && VOC_CAUTION.has(u.name) ? "Usually wants A-levels. Check if it accepts your " + voc[0].badge + "." : "";
+  const uniRow = (u, cls) => { const st = uniStatus(u, m.pts), note = [u.note, caution(u)].filter(Boolean).join(". "); return `<li class="${cls} uni ${st[0]}${sel.includes(u.name) ? " hl" : ""}"><span class="mark" title="${st[2]}">${st[1]}</span>${srcLink(name, u)}<span class="ug">${u.g}</span>${note ? `<span class="note">${note}</span>` : ""}</li>`; };
+  v.innerHTML = `<button type="button" class="back" id="back-to-list">‹ All courses</button>
+    <article class="card detail">
+      <div class="card-top"><span class="area" style="--dot:${AREA_DOT[area]}">${area}</span>${m.on ? pill(k, unis.length) : ""}</div>
+      <h2>${name}</h2>
+      <p class="req">Needs: <b>${reqText(req)}</b>${NEEDS_NOTE[name] ? ` ${NEEDS_NOTE[name]}` : ""}</p>
+      ${via ? `<p class="via"><b>Your ${via.it.label} is accepted instead at some unis.</b> ${via.note}</p>` : ""}
+      ${focus.length ? `<ul class="unis focus-list">${focus.map(f => uniRow(f, "focus")).join("")}</ul>` : ""}
+      <div class="offer"><span class="lab">Offers range</span><span class="g">${low}<span>to</span>${top}</span></div>
+      <div class="bar" aria-label="Offers range from ${gradePts(low)} to ${gradePts(top)} UCAS points.${m.on ? ` You have ${m.pts}.` : ""}">
+        <span class="range" style="left:${lo}%;width:${Math.max(hi - lo, 2)}%"></span>
+        ${m.on ? `<span class="you" style="left:${pct(m.pts)}%">You</span>` : ""}
+      </div>
+      <div class="bar-scale"><span>Wider range of unis</span><span>Most competitive</span></div>
+      <h3>Where to study <span class="sc">${unis.length} unis</span></h3>
+      ${m.on ? `<div class="legend"><span class="uni meet"><span class="mark">✓</span>Your grades meet it</span><span class="uni close"><span class="mark">~</span>One grade off</span><span class="uni reach"><span class="mark">↑</span>Needs higher grades</span></div>` : `<p class="src" style="margin:0">Add predicted grades in step 2 to see which offers you'd meet.</p>`}
+      <ul class="unis">${unis.map(u => uniRow(u, "")).join("")}</ul>
+      <p class="src">${SOURCES[name] ? `Underlined unis were checked on their own course page on ${SOURCES[name].date}. Tap one to open it.` : checked ? "Standard offers for 2027 entry." : "Recent standard offers. Check the uni's website for 2027 entry."}</p>
+      <h3>What's it like?</h3>
+      <div class="more">
+        <p>${about}</p>
+        <p><span class="k">Where it leads:</span> ${careers}</p>
+        ${helpful.length ? `<p><span class="k">Useful extra subjects:</span> ${helpful.join(", ")}</p>` : ""}
+        ${extra ? `<p class="extra">${extra}</p>` : ""}
+      </div>
+    </article>`;
+  document.getElementById("back-to-list").onclick = () => { if (history.state && history.state.course != null) history.back(); else go(3); };
 }
 
 function renderUniPicker(){
@@ -805,7 +913,36 @@ function setupUniPicker(){
   document.addEventListener("keydown", e => { if (e.key === "Escape" && !panel.hidden) { open(false); btn.focus(); } });
 }
 
-function render(){ renderPicker(); renderResults(); }
+function render(){ renderPicker(); renderResults(); renderSteps(); }
+
+// Steps: 1 subjects, 2 grades, 3 courses. The browser's back button moves between them.
+function go(step, course = null, push = true){
+  if (!picks().length) step = 1;
+  state.step = step; ui.course = step === 3 ? course : null; save();
+  if (push){ try { history.pushState({step, course: ui.course}, ""); } catch(e){} }
+  document.querySelectorAll(".step").forEach(el => el.hidden = el.id !== "step-" + step);
+  renderDetail(); renderSteps();
+  window.scrollTo(0, 0);
+}
+function renderSteps(){
+  const step = state.step, has = picks().length > 0;
+  [1,2,3].forEach(n => {
+    const b = document.getElementById("step-link-" + n);
+    b.disabled = n > 1 && !has;
+    b.classList.toggle("done", n < step);
+    if (n === step) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+  });
+  const bar = document.getElementById("stepbar-in");
+  const nPicks = usedSize();
+  if (step === 1) bar.innerHTML = `<span class="sb-note">${has ? `${nPicks} of 4 A-levels' worth picked` : "Pick at least one subject"}</span><button type="button" class="btn" id="sb-next" data-go="2"${has ? "" : " disabled"}>Next: grades</button>`;
+  else if (step === 2) bar.innerHTML = `<button type="button" class="btn ghost" id="sb-back" data-go="1">‹ Subjects</button><button type="button" class="btn" id="sb-next" data-go="3">Show my courses</button>`;
+  else if (ui.course != null) bar.innerHTML = `<button type="button" class="btn ghost" id="sb-back" data-go="list">‹ All courses</button><button type="button" class="btn soft" id="sb-edit" data-go="1">Edit subjects</button>`;
+  else bar.innerHTML = `<button type="button" class="btn ghost" id="sb-back" data-go="2">‹ Grades</button><button type="button" class="btn soft" id="sb-edit" data-go="1">Edit subjects</button>`;
+  bar.querySelectorAll("[data-go]").forEach(b => b.onclick = () => b.dataset.go === "list" ? document.getElementById("back-to-list").click() : go(+b.dataset.go));
+}
+document.querySelectorAll(".step-link").forEach(b => b.onclick = () => go(+b.dataset.step));
+window.addEventListener("popstate", e => { const st = e.state || {step:1}; go(st.step || 1, st.course ?? null, false); });
+document.getElementById("subj-search").oninput = e => { ui.q = e.target.value; renderPicker(); };
 const PALETTES = [["bold","Bold",["#FF4F79","#FFD23F","#24C79C","#5B8CFF"]],["sage","Sage",["#3E7A5C","#B9DDC4","#F1DFA6","#E9B9A6"]],["ocean","Ocean",["#2F6DB0","#BCD3F0","#BFE3D8","#F2C3C0"]],["lavender","Lavender",["#7254B5","#D9CCF0","#C2E2D2","#EDBFD0"]],["stone","Stone",["#8A5A44","#E7C4B4","#C7DECF","#C9D6E2"]]];
 function applyPalette(k){
   const r = document.documentElement;
@@ -818,13 +955,16 @@ function setupPalette(){
   try { cur = localStorage.getItem("flopath-palette") || "bold"; } catch(e){}
   if (!PALETTES.some(p => p[0] === cur)) cur = "bold";
   const box = document.getElementById("palette-btns");
-  box.innerHTML = PALETTES.map(([k, label, cols]) => `<button type="button" class="pal" id="pal-${k}" data-p="${k}" aria-pressed="false"><span class="sw">${cols.map(c => `<i style="background:${c}"></i>`).join("")}</span>${label}</button>`).join("");
+  box.innerHTML = PALETTES.map(([k, label, cols]) => `<button type="button" class="pal" id="pal-${k}" data-p="${k}" aria-pressed="false" aria-label="${label} colours" title="${label}"><span class="sw">${cols.map(c => `<i style="background:${c}"></i>`).join("")}</span><span class="pl">${label}</span></button>`).join("");
   box.querySelectorAll(".pal").forEach(b => b.onclick = () => { applyPalette(b.dataset.p); try { localStorage.setItem("flopath-palette", b.dataset.p); } catch(e){} });
   applyPalette(cur);
 }
 setupPalette();
 setupUniPicker();
+if (![1,2,3].includes(state.step)) state.step = picks().length ? 3 : 1;
 render();
+go(state.step, null, false);
+try { history.replaceState({step: state.step, course: null}, ""); } catch(e){}
 </script>
 
 </body>
