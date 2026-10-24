@@ -95,6 +95,13 @@ h1 .hl{background:linear-gradient(transparent 58%, var(--accent) 58%, var(--acce
 .tray-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:4px}
 .tray-head h2{font-size:1.25rem}
 .subj-search,#uni-search{width:100%;border:2px solid var(--line);border-radius:12px;padding:10px 14px;font:inherit;background:var(--surface);color:var(--ink)}
+.search-box{position:relative}
+.search-box .subj-search{padding-right:44px}
+.subj-search::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+.search-x{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:inline-grid;place-items:center;width:28px;height:28px;border:0;border-radius:50%;background:var(--surface-2);color:var(--ink);font-size:13px;font-weight:800;cursor:pointer}
+.search-x:hover{background:var(--line);color:var(--surface)}
+.clear-filters{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 2px}
+.clear-filters:hover{color:var(--ink)}
 .cats{background:var(--surface);border:2.5px solid var(--line);border-radius:16px;overflow:hidden}
 .cat + .cat{border-top:2px dashed color-mix(in srgb, var(--line) 30%, transparent)}
 .cat-btn{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:14px 16px;font-weight:700;font-size:15px;text-align:left;cursor:pointer}
@@ -319,7 +326,10 @@ a.un{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-
     <div class="tray-head"><h2>Your subjects</h2><span class="count" id="count" title="A-levels' worth picked">0/4</span></div>
     <div id="your-picks"></div>
     <div class="tabs" id="qual-tabs" role="tablist" aria-label="Qualification type"></div>
-    <input type="search" class="subj-search" id="subj-search" placeholder="Search subjects" autocomplete="off" aria-label="Search subjects">
+    <div class="search-box">
+      <input type="search" class="subj-search" id="subj-search" placeholder="Search subjects" autocomplete="off" aria-label="Search subjects">
+      <button type="button" class="search-x" id="subj-search-x" aria-label="Clear search" hidden>✕</button>
+    </div>
     <div id="subject-groups"></div>
     <p class="hint">Pick up to 4 A-levels' worth. Mixing is fine, like 2 A-levels and a BTEC Extended Certificate. A BTEC Extended Diploma or a T Level counts as 3.</p>
   </section>
@@ -349,6 +359,7 @@ a.un{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-
           </div>
           <div class="uni-chips" id="uni-chips"></div>
         </div>
+        <button type="button" class="clear-filters" id="clear-filters" hidden>Clear all filters</button>
       </div>
       <div class="filters" id="filters" role="group" aria-label="Filter by subject area"></div>
       <div id="grid" aria-live="polite"></div>
@@ -686,6 +697,12 @@ function toggle(id){
 
 const byCat = items => CATS.map(c => [c, items.filter(it => it.cat === c)]).filter(([, l]) => l.length);
 
+function setSearch(v){
+  ui.q = v;
+  document.getElementById("subj-search").value = v;
+  document.getElementById("subj-search-x").hidden = !v;
+}
+
 function renderPicker(){
   const ps = picks();
   const tabs = document.getElementById("qual-tabs");
@@ -693,7 +710,7 @@ function renderPicker(){
     const n = ps.filter(it => it.type === t).length;
     return `<button type="button" role="tab" class="tab" id="tab-${t}" aria-selected="${t === state.tab}" data-t="${t}">${label}${n ? `<span class="tn">${n}</span>` : ""}</button>`;
   }).join("");
-  tabs.querySelectorAll(".tab").forEach(b => b.onclick = () => { state.tab = b.dataset.t; ui.cat = null; ui.q = ""; document.getElementById("subj-search").value = ""; save(); renderPicker(); });
+  tabs.querySelectorAll(".tab").forEach(b => b.onclick = () => { state.tab = b.dataset.t; ui.cat = null; setSearch(""); save(); renderPicker(); });
 
   // Subjects sit in folded categories. Searching looks across every qualification type.
   const box = document.getElementById("subject-groups");
@@ -717,7 +734,8 @@ function renderPicker(){
     }).join("")}</div>`;
     box.querySelectorAll(".cat-btn").forEach(b => b.onclick = () => { const k = state.tab + ":" + b.dataset.cat; ui.cat = ui.cat === k ? null : k; renderPicker(); });
   }
-  box.querySelectorAll(".chip").forEach(b => b.onclick = () => toggle(b.dataset.id));
+  // Adding a subject from the search results empties the search, ready for the next one
+  box.querySelectorAll(".chip").forEach(b => b.onclick = () => { const was = state.chosen.includes(b.dataset.id); toggle(b.dataset.id); if (q && !was && state.chosen.includes(b.dataset.id)) { setSearch(""); renderPicker(); } });
 
   const used = usedSize();
   document.getElementById("count").textContent = used + "/4";
@@ -790,6 +808,7 @@ function renderResults(){
   const f = document.getElementById("filters");
   f.innerHTML = areas.map(a => `<button type="button" class="filter" id="filter-${slug(a)}" aria-pressed="${a === state.area}" data-a="${a}">${a}<span class="c">${counts(a)}</span></button>`).join("");
   f.querySelectorAll(".filter").forEach(b => b.onclick = () => { state.area = b.dataset.a; save(); renderResults(); });
+  document.getElementById("clear-filters").hidden = state.area === "All" && !sel.length;
 
   const title = document.getElementById("summary-title"), sub = document.getElementById("summary-sub");
   if (!ps.length){
@@ -942,7 +961,10 @@ function renderSteps(){
 }
 document.querySelectorAll(".step-link").forEach(b => b.onclick = () => go(+b.dataset.step));
 window.addEventListener("popstate", e => { const st = e.state || {step:1}; go(st.step || 1, st.course ?? null, false); });
-document.getElementById("subj-search").oninput = e => { ui.q = e.target.value; renderPicker(); };
+document.getElementById("subj-search").oninput = e => { setSearch(e.target.value); renderPicker(); };
+document.getElementById("subj-search").onkeydown = e => { if (e.key === "Escape" && ui.q) { e.preventDefault(); setSearch(""); renderPicker(); } };
+document.getElementById("subj-search-x").onclick = () => { setSearch(""); renderPicker(); document.getElementById("subj-search").focus(); };
+document.getElementById("clear-filters").onclick = () => { state.area = "All"; state.unis = []; save(); renderResults(); };
 const PALETTES = [["bold","Bold",["#FF4F79","#FFD23F","#24C79C","#5B8CFF"]],["sage","Sage",["#3E7A5C","#B9DDC4","#F1DFA6","#E9B9A6"]],["ocean","Ocean",["#2F6DB0","#BCD3F0","#BFE3D8","#F2C3C0"]],["lavender","Lavender",["#7254B5","#D9CCF0","#C2E2D2","#EDBFD0"]],["stone","Stone",["#8A5A44","#E7C4B4","#C7DECF","#C9D6E2"]]];
 function applyPalette(k){
   const r = document.documentElement;
