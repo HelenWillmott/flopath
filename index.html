@@ -102,6 +102,7 @@ h1 .hl{background:linear-gradient(transparent 58%, var(--accent) 58%, var(--acce
 .search-x:hover{background:var(--line);color:var(--surface)}
 .clear-filters{border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:4px 2px}
 .clear-filters:hover{color:var(--ink)}
+.tray-right{display:inline-flex;align-items:baseline;gap:12px}
 .cats{background:var(--surface);border:2.5px solid var(--line);border-radius:16px;overflow:hidden}
 .cat + .cat{border-top:2px dashed color-mix(in srgb, var(--line) 30%, transparent)}
 .cat-btn{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;padding:14px 16px;font-weight:700;font-size:15px;text-align:left;cursor:pointer}
@@ -323,7 +324,7 @@ a.un{color:inherit;text-decoration:underline;text-decoration-thickness:1px;text-
   <section class="step" id="step-1" aria-labelledby="step-1-title">
     <h1 id="step-1-title">Pick your subjects. See <span class="hl">where they lead.</span></h1>
     <p class="lede">Choose what you're studying after GCSEs. We'll show the UK degree courses it opens up, where you can study them and the grades they ask for.</p>
-    <div class="tray-head"><h2>Your subjects</h2><span class="count" id="count" title="A-levels' worth picked">0/4</span></div>
+    <div class="tray-head"><h2>Your subjects</h2><span class="tray-right"><button type="button" class="clear-filters" id="clear-subjects" hidden>Clear all</button><span class="count" id="count" title="A-levels' worth picked">0/4</span></span></div>
     <div id="your-picks"></div>
     <div class="tabs" id="qual-tabs" role="tablist" aria-label="Qualification type"></div>
     <div class="search-box">
@@ -739,6 +740,7 @@ function renderPicker(){
 
   const used = usedSize();
   document.getElementById("count").textContent = used + "/4";
+  document.getElementById("clear-subjects").hidden = !ps.length;
   const yp = document.getElementById("your-picks");
   const pickBtn = it => `<button type="button" class="pick" data-id="${it.id}" aria-label="Remove ${it.label}"><span class="badge">${it.badge}</span>${it.name}<span class="x">✕</span></button>`;
   yp.innerHTML = ps.length ? `<div class="chips">${ps.map(pickBtn).join("")}</div>` : `<p class="empty-grades">Nothing picked yet. Open a category below or search.</p>`;
@@ -964,6 +966,7 @@ window.addEventListener("popstate", e => { const st = e.state || {step:1}; go(st
 document.getElementById("subj-search").oninput = e => { setSearch(e.target.value); renderPicker(); };
 document.getElementById("subj-search").onkeydown = e => { if (e.key === "Escape" && ui.q) { e.preventDefault(); setSearch(""); renderPicker(); } };
 document.getElementById("subj-search-x").onclick = () => { setSearch(""); renderPicker(); document.getElementById("subj-search").focus(); };
+document.getElementById("clear-subjects").onclick = () => { state.chosen = []; state.grades = {}; state.sizes = {}; ui.cat = null; setSearch(""); save(); render(); toast("All subjects cleared"); };
 document.getElementById("clear-filters").onclick = () => { state.area = "All"; state.unis = []; save(); renderResults(); };
 const PALETTES = [["bold","Bold",["#FF4F79","#FFD23F","#24C79C","#5B8CFF"]],["sage","Sage",["#3E7A5C","#B9DDC4","#F1DFA6","#E9B9A6"]],["ocean","Ocean",["#2F6DB0","#BCD3F0","#BFE3D8","#F2C3C0"]],["lavender","Lavender",["#7254B5","#D9CCF0","#C2E2D2","#EDBFD0"]],["stone","Stone",["#8A5A44","#E7C4B4","#C7DECF","#C9D6E2"]]];
 function applyPalette(k){
